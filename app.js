@@ -33,14 +33,16 @@
         const card = document.createElement("article");
         card.className = "cov-card";
         const imgBlock = c.img
-          ? `<div class="cov-img"><img loading="lazy" src="${escapeAttr(c.img)}" alt="${escapeAttr(c.name)}"></div>`
-          : `<div class="cov-img"><div class="cov-placeholder">${escapeHtml(c.name)}</div></div>`;
+          ? `<img loading="lazy" src="${escapeAttr(c.img)}" alt="${escapeAttr(c.name)}">`
+          : `<div class="cov-placeholder"></div>`;
         const statusCls = c.status ? ` ${c.status.toLowerCase()}` : "";
         card.innerHTML = `
           ${imgBlock}
-          <div class="cov-brand">${escapeHtml(c.brand || "")}</div>
-          <div class="cov-name">${escapeHtml(c.name || "")}</div>
-          ${c.status ? `<span class="cov-status${statusCls}">${escapeHtml(c.status)}</span>` : ""}
+          <div class="cov-meta">
+            <div class="cov-brand">${escapeHtml(c.brand || "")}</div>
+            <div class="cov-name">${escapeHtml(c.name || "")}</div>
+            ${c.status ? `<div class="cov-status${statusCls}">${escapeHtml(c.status)}</div>` : ""}
+          </div>
         `;
         covGrid.appendChild(card);
       });
