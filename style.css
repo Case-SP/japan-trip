@@ -19,6 +19,7 @@ body {
   font-weight: 400;
   font-size: 16px;
   line-height: 1.25;
+  letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   padding-bottom: env(safe-area-inset-bottom);
@@ -69,14 +70,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .brand-dot:active::before { transform: scale(1.25); }
 .brand-dot[aria-expanded="true"]::before { transform: scale(1.3); }
 
-/* ── Masthead ─────────────────────────────────────────── */
-.masthead {
-  padding: 56px 24px 40px;
-}
-.title {
+/* ── Ledger clock (top strip, below brand bar) ────────── */
+.ledger-clock {
+  text-align: center;
   font-size: 24px;
   line-height: 1.1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.04em;
+  color: var(--ink-muted);
+  padding: 8px 24px 4px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 10px;
+}
+.ledger-clock .ledger-sep { color: var(--ink-muted); }
+
+/* ── Masthead ─────────────────────────────────────────── */
+.masthead {
+  padding: 48px 24px 40px;
+}
+.title {
+  font-size: 20px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
   font-weight: 400;
   color: var(--ink);
   margin: 0 0 8px;
@@ -84,50 +100,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .subtitle {
   font-size: 16px;
   line-height: 1.25;
+  letter-spacing: -0.02em;
   color: var(--ink-muted);
   margin: 0;
   max-width: 40ch;
 }
 
 /* ── Sections (generic) ───────────────────────────────── */
-.section { padding: 0 24px 56px; }
+.section { padding: 0 24px 48px; }
 .section-head {
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1.1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.04em;
   font-weight: 400;
   color: var(--ink);
-  margin: 0 0 20px;
+  margin: 0 0 8px;
 }
 .section-intro {
   font-size: 16px;
   line-height: 1.3;
+  letter-spacing: -0.02em;
   color: var(--ink);
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   max-width: 50ch;
-}
-
-/* ── Ledger ───────────────────────────────────────────── */
-.ledger {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-.stat { padding: 0; }
-.stat .num {
-  display: block;
-  font-size: 24px;
-  line-height: 1.05;
-  letter-spacing: -0.015em;
-  font-weight: 400;
-  color: var(--ink);
-}
-.stat .lbl {
-  display: block;
-  font-size: 16px;
-  line-height: 1.2;
-  color: var(--ink-muted);
-  margin-top: 6px;
 }
 
 /* ── Coveted ──────────────────────────────────────────── */
