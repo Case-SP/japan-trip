@@ -3,22 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f4efe6">
+<meta name="theme-color" content="#e7e3dd">
 <title>Japan — A Field Journal</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="masthead">
-  <div class="mast-row">
-    <span class="mark">M—T</span>
-    <span class="mast-meta" id="trip-dates">May 2026</span>
-  </div>
-  <h1 class="title">Japan<span class="period">.</span></h1>
-  <p class="subtitle"><em>A field journal &mdash; with shopping waits.</em></p>
+<header class="brand-bar">
+  <span class="brand-mark" id="brand-mark">Field Journal</span>
+  <span class="brand-dot" aria-hidden="true"></span>
 </header>
 
-<section class="map" aria-label="Map of Japan">
+<section class="masthead">
+  <h1 class="title">Japan</h1>
+  <p class="subtitle"><em>A field journal of one trip, with shopping waits.</em></p>
+</section>
+
+<section class="map-section" aria-label="Map of Japan">
   <svg id="jp-map" viewBox="0 0 200 320" role="img" aria-label="Japan, with visited cities">
     <g class="land">
       <path d="M 120 30 C 142 22 168 33 170 55 C 170 75 148 82 130 76 C 112 70 104 45 120 30 Z"/>
@@ -32,32 +33,36 @@
   <p class="map-note">Tap a city to filter</p>
 </section>
 
-<section class="stats" aria-label="Shopping ledger">
-  <div class="stat"><span class="num" id="stat-min">—</span><span class="lbl">Min&nbsp;spent</span></div>
-  <div class="stat"><span class="num" id="stat-eyed">—</span><span class="lbl">Eyed</span></div>
-  <div class="stat"><span class="num" id="stat-bought">—</span><span class="lbl">Bought</span></div>
+<section class="section ledger-section" aria-label="Shopping ledger">
+  <h2 class="section-head">Ledger</h2>
+  <div class="ledger">
+    <div class="stat"><span class="num" id="stat-min">—</span><span class="lbl">Min&nbsp;spent</span></div>
+    <div class="stat"><span class="num" id="stat-eyed">—</span><span class="lbl">Eyed</span></div>
+    <div class="stat"><span class="num" id="stat-bought">—</span><span class="lbl">Bought</span></div>
+  </div>
 </section>
 
-<section class="coveted" aria-label="Coveted objects">
-  <header class="coveted-head">
-    <span class="coveted-kicker">Coveted</span>
-    <span class="coveted-sub"><em>still on the list</em></span>
-  </header>
+<section class="section coveted" aria-label="Coveted objects">
+  <h2 class="section-head">Coveted</h2>
+  <p class="section-intro">Objects we tracked across the country &mdash; some watched, some hunted, some carried home.</p>
   <div id="coveted-grid" class="coveted-grid"></div>
 </section>
 
-<nav class="chips" aria-label="Filter">
-  <button class="chip is-on" data-filter="all">All</button>
-  <button class="chip" data-filter="tokyo">Tokyo</button>
-  <button class="chip" data-filter="kyoto">Kyoto</button>
-  <button class="chip" data-filter="osaka">Osaka</button>
-  <button class="chip chip-accent" data-filter="shop">Wife's shops</button>
-</nav>
-
-<main id="feed" class="feed"></main>
+<section class="section field-notes" aria-label="Field notes">
+  <h2 class="section-head">Field Notes</h2>
+  <nav class="chips" aria-label="Filter">
+    <button class="chip is-on" data-filter="all">All</button>
+    <button class="chip" data-filter="tokyo">Tokyo</button>
+    <button class="chip" data-filter="kyoto">Kyoto</button>
+    <button class="chip" data-filter="osaka">Osaka</button>
+    <button class="chip" data-filter="shop">Wife's shops</button>
+  </nav>
+  <main id="feed" class="feed"></main>
+</section>
 
 <footer class="colophon">
-  <p>Built mobile-first.<br>Add a photo &mdash; ask Claude.</p>
+  <p>Built mobile-first &mdash; a personal journal.</p>
+  <p id="trip-dates">May 2026</p>
 </footer>
 
 <div id="lightbox" class="lightbox" hidden>

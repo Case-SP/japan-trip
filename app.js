@@ -2,7 +2,7 @@
   const data = (window.TRIP && window.TRIP.entries) || [];
   const feed = document.getElementById("feed");
   const datesEl = document.getElementById("trip-dates");
-  if (window.TRIP && window.TRIP.dates) datesEl.textContent = window.TRIP.dates;
+  if (window.TRIP && window.TRIP.dates && datesEl) datesEl.textContent = window.TRIP.dates;
 
   const CITY_COORDS = {
     sapporo:   { x: 142, y: 52,  lx: 152, ly: 56,  anchor: "start" },
@@ -74,16 +74,29 @@
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
     g.setAttribute("aria-label", "Filter to " + city);
-    const dot = document.createElementNS(NS, "circle");
-    dot.setAttribute("cx", c.x); dot.setAttribute("cy", c.y); dot.setAttribute("r", 2.6);
+
     const ring = document.createElementNS(NS, "circle");
     ring.setAttribute("class", "ring");
     ring.setAttribute("cx", c.x); ring.setAttribute("cy", c.y); ring.setAttribute("r", 5.5);
+
+    const dot = document.createElementNS(NS, "circle");
+    dot.setAttribute("class", "dot");
+    dot.setAttribute("cx", c.x); dot.setAttribute("cy", c.y); dot.setAttribute("r", 2.4);
+
+    const hit = document.createElementNS(NS, "circle");
+    hit.setAttribute("cx", c.x); hit.setAttribute("cy", c.y); hit.setAttribute("r", 10);
+    hit.setAttribute("fill", "transparent");
+
     const t = document.createElementNS(NS, "text");
     t.setAttribute("x", c.lx); t.setAttribute("y", c.ly);
     t.setAttribute("text-anchor", c.anchor);
     t.textContent = city.charAt(0).toUpperCase() + city.slice(1);
-    g.appendChild(ring); g.appendChild(dot); g.appendChild(t);
+
+    g.appendChild(ring);
+    g.appendChild(dot);
+    g.appendChild(t);
+    g.appendChild(hit);
+
     g.addEventListener("click", () => applyFilter(city));
     g.addEventListener("keypress", ev => { if (ev.key === "Enter") applyFilter(city); });
     citiesG.appendChild(g);
@@ -92,7 +105,7 @@
   const fmtDate = iso => {
     const d = new Date(iso + "T00:00:00");
     if (isNaN(d)) return iso;
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return d.toLocaleDateString("en-US", { month: "long", day: "numeric" });
   };
 
   data.forEach((e, i) => {
@@ -102,10 +115,21 @@
     entry.dataset.shop = e.shop ? "1" : "0";
     entry.dataset.index = String(i);
     const ratio = e.ratio ? ` ${e.ratio}` : "";
-    const num = String(i + 1).padStart(2, "0");
     const photoHtml = e.src
-      ? `<div class="photo${ratio}" data-index="${i}"><img loading="lazy" src="${e.src}" alt="${escapeAttr(e.caption || e.location)}"></div>`
-      : `<div class="photo${ratio}"><div class="placeholder">${escapeHtml(e.location || "Add photo")}</div></div>`;
+      ? `<div class="photo${ratio}" data-index="${i}"><img loading="lazy" src="${escapeAttr(e.src)}" alt="${escapeAttr(e.caption || e.location)}"></div>`
+      : `<div class="photo${ratio}"><div class="placeholder">${escapeHtml(e.location || "Photo to come")}</div></div>`;
+
+    const metaBits = [];
+    if (e.location) metaBits.push(escapeHtml(e.location));
+    if (e.date) metaBits.push(escapeHtml(fmtDate(e.date)));
+    const metaLine = metaBits.length
+      ? `<p class="entry-cap">${metaBits.join(" &middot; ")}</p>`
+      : "";
+
+    const noteLine = e.caption
+      ? `<p class="entry-note"><em>${escapeHtml(e.caption)}</em></p>`
+      : "";
+
     let ledger = "";
     if (e.shop) {
       const bits = [];
@@ -114,19 +138,8 @@
       if (e.shop.bought != null) bits.push(`${e.shop.bought} bought`);
       ledger = `<p class="wait">${escapeHtml(e.shop.name || "Shop")} &mdash; ${bits.join(" &middot; ")}</p>`;
     }
-    entry.innerHTML = `
-      <div class="entry-head">
-        <span class="entry-num">${num}</span>
-        <span class="entry-loc">${escapeHtml(e.location || "")}</span>
-      </div>
-      ${photoHtml}
-      ${e.caption ? `<p class="entry-cap">${escapeHtml(e.caption)}</p>` : ""}
-      <div class="entry-meta">
-        <span class="date">${fmtDate(e.date)}</span>
-        ${e.shop ? `<span>Wife&rsquo;s shop</span>` : ""}
-      </div>
-      ${ledger}
-    `;
+
+    entry.innerHTML = `${photoHtml}${metaLine}${noteLine}${ledger}`;
     feed.appendChild(entry);
   });
 
@@ -141,7 +154,8 @@
     document.querySelectorAll("#map-cities .city").forEach(g => {
       g.classList.toggle("is-on", g.dataset.city === f);
     });
-    window.scrollTo({ top: document.querySelector(".feed").offsetTop - 8, behavior: "smooth" });
+    const feedTop = document.querySelector(".field-notes");
+    if (feedTop) window.scrollTo({ top: feedTop.offsetTop - 8, behavior: "smooth" });
   }
   chips.forEach(c => c.addEventListener("click", () => applyFilter(c.dataset.filter)));
 
@@ -167,7 +181,10 @@
     if (!e) return;
     lbImg.src = e.src;
     lbImg.alt = e.caption || e.location || "";
-    lbCap.textContent = e.caption ? `${e.caption} — ${e.location}` : (e.location || "");
+    const bits = [];
+    if (e.caption) bits.push(e.caption);
+    if (e.location) bits.push(e.location);
+    lbCap.textContent = bits.join(" — ");
   }
   function closeLb() { lb.hidden = true; document.body.style.overflow = ""; }
   function next() { if (!visible.length) return; cur = (cur + 1) % visible.length; showCur(); }
