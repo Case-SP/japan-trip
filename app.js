@@ -62,15 +62,23 @@
   [...data].sort((a, b) => (a.date || "").localeCompare(b.date || ""))
     .forEach(e => { if (e.city && !seen.has(e.city)) { seen.add(e.city); visitedCities.push(e.city); } });
 
-  /* ── City carousels (Field Notes) ────────────────────── */
+  /* ── Filter bar + vertical feed ──────────────────────── */
   const fmtCity = c => c.charAt(0).toUpperCase() + c.slice(1);
-  const citySectionsEl = document.getElementById("city-sections");
+  const feedEl = document.getElementById("feed");
+  const filterBarEl = document.getElementById("filter-bar");
 
-  function buildCardHTML(entry) {
+  const sortedEntries = [...data].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  const seenCities = new Set();
+  const cityOrder = [];
+  sortedEntries.forEach(e => {
+    if (e.city && !seenCities.has(e.city)) { seenCities.add(e.city); cityOrder.push(e.city); }
+  });
+
+  function buildEntryHTML(entry) {
     const srcs = [entry.src, ...(entry.gallery || [])].filter(Boolean);
     const imgs = srcs.length
-      ? srcs.map((s, i) => `<img loading="lazy" src="${escapeAttr(s)}" class="card-img${i === 0 ? " is-on" : ""}" alt="" onerror="this.style.visibility='hidden'">`).join("")
-      : `<div class="card-placeholder"></div>`;
+      ? srcs.map((s, i) => `<img loading="lazy" src="${escapeAttr(s)}" class="entry-img${i === 0 ? " is-on" : ""}" alt="" onerror="this.style.visibility='hidden'">`).join("")
+      : "";
     const primary = entry.shop ? entry.shop.name : entry.location;
     const placeText = entry.shop ? entry.location : "";
     let statsText = "";
@@ -82,88 +90,61 @@
       statsText = p.join(" · ");
     }
     return `
-      <article class="card" data-id="${escapeAttr(entry.id)}" data-count="${Math.max(1, srcs.length)}" data-index="0">
-        <div class="card-img-stack">${imgs}</div>
-        <div class="card-meta">
-          <div class="card-shop">${escapeHtml(primary || "")}</div>
-          ${placeText ? `<div class="card-place">${escapeHtml(placeText)}</div>` : ""}
-          ${statsText ? `<div class="card-stats">${escapeHtml(statsText)}</div>` : ""}
+      <article class="entry" data-id="${escapeAttr(entry.id)}" data-city="${escapeAttr(entry.city || "")}" data-count="${Math.max(1, srcs.length)}" data-index="0">
+        ${imgs ? `<div class="entry-img-stack">${imgs}</div>` : ""}
+        <div class="entry-meta">
+          <div class="entry-shop">${escapeHtml(primary || "")}</div>
+          ${placeText ? `<div class="entry-place">${escapeHtml(placeText)}</div>` : ""}
+          ${statsText ? `<div class="entry-stats">${escapeHtml(statsText)}</div>` : ""}
         </div>
       </article>
     `;
   }
 
-  function wireSection(section) {
-    const carousel = section.querySelector(".carousel");
-    const cards = Array.from(section.querySelectorAll(".card"));
-    const segs = Array.from(section.querySelectorAll(".indicator .seg"));
-
-    const updateIndicator = () => {
-      const cRect = carousel.getBoundingClientRect();
-      const targetX = cRect.left + 24;  // matches scroll-padding-left
-      let closest = 0;
-      let minDist = Infinity;
-      cards.forEach((card, i) => {
-        const r = card.getBoundingClientRect();
-        const d = Math.abs(r.left - targetX);
-        if (d < minDist) { minDist = d; closest = i; }
-      });
-      segs.forEach((s, i) => s.classList.toggle("is-on", i === closest));
-    };
-    carousel.addEventListener("scroll", updateIndicator, { passive: true });
-    requestAnimationFrame(updateIndicator);
-
-    segs.forEach((seg, i) => {
-      seg.addEventListener("click", () => {
-        const target = cards[i];
-        const left = target.offsetLeft - 24;  // align to scroll-padding
-        carousel.scrollTo({ left, behavior: "smooth" });
-      });
+  function renderFilterBar() {
+    const items = [{ key: "all", label: "All" }, ...cityOrder.map(c => ({ key: c, label: fmtCity(c) }))];
+    filterBarEl.innerHTML = items.map(it => `
+      <button class="filter-seg${it.key === "all" ? " is-on" : ""}" data-filter="${escapeAttr(it.key)}" role="tab" aria-selected="${it.key === "all"}">
+        <span class="filter-line" aria-hidden="true"></span>
+        <span class="filter-label">${escapeHtml(it.label)}</span>
+      </button>
+    `).join("");
+    filterBarEl.querySelectorAll(".filter-seg").forEach(btn => {
+      btn.addEventListener("click", () => applyFilter(btn.dataset.filter));
     });
+  }
 
-    cards.forEach(card => {
-      const count = parseInt(card.dataset.count, 10);
+  function applyFilter(filter) {
+    filterBarEl.querySelectorAll(".filter-seg").forEach(b => {
+      const on = b.dataset.filter === filter;
+      b.classList.toggle("is-on", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    feedEl.querySelectorAll(".entry").forEach(el => {
+      if (filter === "all") el.classList.remove("hidden");
+      else el.classList.toggle("hidden", el.dataset.city !== filter);
+    });
+  }
+
+  function renderFeed() {
+    feedEl.innerHTML = sortedEntries.map(buildEntryHTML).join("");
+    feedEl.querySelectorAll(".entry").forEach(entry => {
+      const count = parseInt(entry.dataset.count, 10);
       if (count <= 1) return;
-      card.addEventListener("click", () => {
-        const imgs = card.querySelectorAll(".card-img");
-        let idx = parseInt(card.dataset.index, 10);
+      const stack = entry.querySelector(".entry-img-stack");
+      if (!stack) return;
+      stack.addEventListener("click", () => {
+        const imgs = entry.querySelectorAll(".entry-img");
+        let idx = parseInt(entry.dataset.index, 10);
         const next = (idx + 1) % count;
-        card.dataset.index = next;
+        entry.dataset.index = next;
         imgs.forEach((img, i) => img.classList.toggle("is-on", i === next));
       });
     });
   }
 
-  function renderCitySections() {
-    const seen = new Set();
-    const cityOrder = [];
-    [...data].sort((a, b) => (a.date || "").localeCompare(b.date || ""))
-      .forEach(e => { if (e.city && !seen.has(e.city)) { seen.add(e.city); cityOrder.push(e.city); } });
-
-    citySectionsEl.innerHTML = "";
-
-    cityOrder.forEach(city => {
-      const cityEntries = data
-        .filter(e => e.city === city)
-        .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
-      if (!cityEntries.length) return;
-
-      const section = document.createElement("section");
-      section.className = "section city-section";
-      section.dataset.city = city;
-      const segs = cityEntries.map((_, i) => `<span class="seg${i === 0 ? " is-on" : ""}" data-i="${i}"></span>`).join("");
-      section.innerHTML = `
-        <h2 class="section-head">Japan / ${escapeHtml(fmtCity(city))}</h2>
-        <div class="carousel-wrap">
-          <div class="carousel">${cityEntries.map(buildCardHTML).join("")}</div>
-        </div>
-        <div class="indicator">${segs}</div>
-      `;
-      citySectionsEl.appendChild(section);
-      wireSection(section);
-    });
-  }
-  renderCitySections();
+  renderFilterBar();
+  renderFeed();
 
   /* ── Map sheet (Leaflet, lazy) ───────────────────────── */
   const mapTrigger = document.getElementById("map-trigger");

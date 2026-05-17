@@ -119,7 +119,7 @@ body { padding-bottom: 80px; }
 .cov-card > img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
   background: var(--paper);
 }
@@ -158,89 +158,103 @@ body { padding-bottom: 80px; }
   margin: 0;
 }
 
-/* ── City carousels (Field Notes) ─────────────────────── */
-.carousel-wrap { margin: 0 -24px; }
-.carousel {
+/* ── Filter bar (line bar with city labels) ──────────── */
+.filter-bar {
   display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  padding: 0 24px 4px;
-  scroll-padding-left: 24px;
+  gap: 0;
+  margin: 0 0 32px;
 }
-.carousel::-webkit-scrollbar { display: none; }
-
-.card {
-  flex: 0 0 calc(100vw - 48px);
-  max-width: 480px;
-  scroll-snap-align: start;
+.filter-seg {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+.filter-line {
+  display: block;
+  height: 2px;
+  background: rgba(42, 42, 42, 0.18);
+  transition: background 200ms ease;
+}
+.filter-seg.is-on .filter-line { background: var(--ink); }
+.filter-label {
+  display: block;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink-muted);
+  transition: color 200ms ease;
+}
+.filter-seg.is-on .filter-label { color: var(--ink); }
+
+/* ── Vertical feed ────────────────────────────────────── */
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+.entry {
+  display: flex;
+  flex-direction: column;
+}
+.entry.hidden { display: none; }
+.entry-img-stack {
+  position: relative;
+  width: 100%;
+  background: var(--paper);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.card-img-stack {
-  position: relative;
+.entry-img {
   width: 100%;
-  aspect-ratio: 4 / 5;
-  background: var(--paper);
-  overflow: hidden;
-}
-.card-img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: contain;
+  height: auto;
+  display: block;
   opacity: 0;
   transition: opacity 300ms ease;
+}
+.entry-img.is-on { opacity: 1; }
+.entry-img:not(:first-child) {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  object-fit: contain;
   background: var(--paper);
 }
-.card-img.is-on { opacity: 1; }
-.card-placeholder { position: absolute; inset: 0; background: var(--paper); }
-
-.card-meta {
+.entry-meta {
   padding: 8px 0 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
   text-align: left;
 }
-.card-shop {
+.entry-shop {
   font-size: 16px;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--ink);
   margin: 0;
 }
-.card-place {
+.entry-place {
   font-size: 14px;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--ink-muted);
   margin: 0;
 }
-.card-stats {
+.entry-stats {
   font-size: 13px;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--ink-muted);
   margin: 0;
 }
-
-.indicator {
-  display: flex;
-  gap: 4px;
-  margin: 16px 0 0;
-  height: 2px;
-}
-.indicator .seg {
-  flex: 1;
-  background: rgba(42, 42, 42, 0.18);
-  cursor: pointer;
-  transition: background 200ms ease;
-}
-.indicator .seg.is-on { background: var(--ink); }
 
 /* ── Map sheet (half-sheet drawer) ────────────────────── */
 .map-backdrop {
