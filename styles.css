@@ -1,0 +1,323 @@
+:root {
+  --paper: #f3ecd9;
+  --paper-warm: #ece2c4;
+  --ink: #2b2418;
+  --ink-soft: #5b4f3b;
+  --rule: #c8b994;
+  --terracotta: #b14a2a;
+  --terracotta-deep: #8a3a21;
+  --serif: ui-serif, "New York", "Iowan Old Style", "Iowan", Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body {
+  padding: 24px 20px 64px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* Masthead */
+.masthead {
+  text-align: center;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 0.5px solid var(--rule);
+}
+.masthead .kicker {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.masthead h1 {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 60px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+.masthead .sub {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+
+/* Map */
+.map-wrap {
+  margin: 14px auto 8px;
+  text-align: center;
+}
+.map-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.map-island {
+  fill: var(--paper-warm);
+  stroke: var(--ink);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.map-route {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 0.9;
+  stroke-dasharray: 2 3;
+  stroke-linecap: round;
+}
+.map-dot {
+  fill: var(--terracotta);
+  cursor: pointer;
+  transition: r 0.15s ease, fill 0.15s ease;
+}
+.map-dot.is-active {
+  fill: var(--terracotta-deep);
+  stroke: var(--ink);
+  stroke-width: 0.8;
+}
+.map-dot-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+.map-label {
+  font-family: var(--serif);
+  font-size: 7.5px;
+  font-style: italic;
+  fill: var(--ink);
+  pointer-events: none;
+}
+.map-caption {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* Metrics */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin: 22px 0 28px;
+  padding: 16px 6px;
+  border-top: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
+  text-align: center;
+}
+.metric .num {
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.metric .lbl {
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  display: block;
+  line-height: 1.3;
+}
+
+/* Filter chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 26px;
+  justify-content: center;
+}
+.chip {
+  font-family: inherit;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink);
+  background: transparent;
+  border: 0.5px solid var(--rule);
+  border-radius: 999px;
+  padding: 4px 12px 5px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.chip:hover { border-color: var(--ink-soft); }
+.chip.is-active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.chip.wife { font-style: italic; }
+
+/* Feed */
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+.entry-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.entry-no {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.entry-meta {
+  flex: 1;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-soft);
+  text-align: right;
+}
+.entry-loc {
+  font-size: 18px;
+  font-weight: 500;
+  font-style: italic;
+  margin: 0 0 14px;
+  line-height: 1.2;
+}
+.entry-photo {
+  width: 100%;
+  background: var(--paper-warm);
+  display: block;
+  cursor: zoom-in;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.entry-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.entry-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 22px,
+      rgba(91, 79, 59, 0.05) 22px 23px
+    ),
+    var(--paper-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+}
+.entry-caption {
+  font-style: italic;
+  font-size: 15.5px;
+  line-height: 1.5;
+  margin: 12px 2px 0;
+  color: var(--ink);
+}
+.entry-shop {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 0.5px solid var(--rule);
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  align-items: baseline;
+}
+.entry-shop .shop-name {
+  font-style: italic;
+  color: var(--ink);
+  font-size: 13.5px;
+  flex-basis: 100%;
+  margin-bottom: 4px;
+}
+.entry-shop em {
+  font-style: normal;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin: 40px 0;
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 16, 8, 0.94);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+.lightbox.is-open { display: flex; }
+.lightbox-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 64px;
+}
+.lightbox img {
+  max-width: 100%;
+  max-height: 78vh;
+  display: block;
+}
+.lightbox-caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 22px;
+  text-align: center;
+  font-style: italic;
+  font-size: 13px;
+  color: #e9dec3;
+  padding: 0 24px;
+  line-height: 1.4;
+}
+.lightbox-count {
+  position: absolute;
+  top: 16px; left: 0; right: 0;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #c2b58f;
+}
+
+/* Colophon */
+.colophon {
+  margin-top: 56px;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--rule);
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-soft);
+}

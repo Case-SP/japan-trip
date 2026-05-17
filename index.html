@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3ecd9">
+<title>Japan &mdash; spring 2026</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="masthead">
+  <span class="kicker">a travel log</span>
+  <h1>Japan</h1>
+  <div class="sub">spring 2026</div>
+</header>
+
+<div class="map-wrap" aria-label="map of visited cities">
+  <svg id="map-svg" viewBox="0 0 280 340" role="img" aria-label="Hand-drawn outline of Japan">
+    <path class="map-island" d="M 188 24 Q 222 22 245 52 Q 258 82 240 102 Q 218 118 198 112 Q 180 105 178 88 Q 178 60 188 24 Z"/>
+    <path class="map-island" d="M 210 108 Q 222 132 218 158 Q 222 195 208 220 Q 198 242 178 254 Q 140 268 100 274 Q 65 278 48 270 Q 60 258 88 246 Q 118 232 138 215 Q 162 192 178 162 Q 192 132 210 108 Z"/>
+    <path class="map-island" d="M 62 258 Q 92 256 108 264 Q 100 282 78 285 Q 60 280 62 258 Z"/>
+    <path class="map-island" d="M 55 262 Q 32 268 28 285 Q 25 305 35 322 Q 50 332 60 320 Q 70 300 62 280 Q 60 268 55 262 Z"/>
+  </svg>
+  <div class="map-caption"><em>tap a dot to filter the feed</em></div>
+</div>
+
+<section class="metrics" aria-label="trip totals">
+  <div class="metric"><div class="num" id="metric-mins">0</div><span class="lbl">minutes<br>waiting</span></div>
+  <div class="metric"><div class="num" id="metric-eyed">0</div><span class="lbl">items<br>eyed</span></div>
+  <div class="metric"><div class="num" id="metric-bought">0</div><span class="lbl">items<br>bought</span></div>
+</section>
+
+<nav id="chips" class="chips" aria-label="filter entries"></nav>
+
+<main id="feed" class="feed"></main>
+
+<footer class="colophon">
+  <em>compiled from field notes &amp; receipts.</em>
+</footer>
+
+<div id="lightbox" class="lightbox" aria-modal="true" role="dialog" aria-hidden="true">
+  <div id="lb-count" class="lightbox-count"></div>
+  <div class="lightbox-stage"><img id="lb-img" alt=""></div>
+  <div id="lb-caption" class="lightbox-caption"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
