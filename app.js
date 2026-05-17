@@ -29,10 +29,15 @@
       coveted.forEach(c => {
         const card = document.createElement("article");
         card.className = "cov-card";
-        const imgBlock = c.img
-          ? `<img loading="lazy" src="${escapeAttr(c.img)}" alt="${escapeAttr(c.name)}" onerror="this.style.visibility='hidden'">`
+        const srcs = [c.img, ...(c.gallery || [])].filter(Boolean);
+        const imgBlock = srcs.length
+          ? `<div class="cov-img-wrap">${srcs.map((s, i) =>
+              `<img loading="lazy" src="${escapeAttr(s)}" class="cov-img${i === 0 ? " is-on" : ""}" alt="${escapeAttr(c.name)}" onerror="this.style.visibility='hidden'">`
+            ).join("")}</div>`
           : `<div class="cov-placeholder"></div>`;
         const statusCls = c.status ? ` ${c.status.toLowerCase()}` : "";
+        card.dataset.count = String(Math.max(1, srcs.length));
+        card.dataset.index = "0";
         card.innerHTML = `
           ${imgBlock}
           <div class="cov-meta">
@@ -42,6 +47,17 @@
           </div>
         `;
         covGrid.appendChild(card);
+        if (srcs.length > 1) {
+          const wrap = card.querySelector(".cov-img-wrap");
+          wrap.style.cursor = "pointer";
+          wrap.addEventListener("click", () => {
+            const imgs = card.querySelectorAll(".cov-img");
+            let idx = parseInt(card.dataset.index, 10);
+            const next = (idx + 1) % srcs.length;
+            card.dataset.index = next;
+            imgs.forEach((img, i) => img.classList.toggle("is-on", i === next));
+          });
+        }
       });
     } else {
       covGrid.parentElement.style.display = "none";

@@ -3,122 +3,51 @@ window.TRIP = {
   dates: "May 2026",
   coveted: [
     // status: "watching" | "hunting" | "bought"
-    { brand: "Cartier",         name: "Panthère watch",    img: "photos/cartier-panthere.avif", status: "watching" },
-    { brand: "Dior",            name: "Saddle bag",        img: "photos/dior-saddle.webp",      status: "watching" },
-    { brand: "Uniqlo",          name: "Assorted shirts",   img: "photos/uniqlo-shirts.jpg",     status: "hunting"  },
-    { brand: "Comme des Garçons", name: "Halter top",      img: "photos/cdg-halter-top.jpg",    status: "watching" }
+    { brand: "Cartier",         name: "Panthère watch",  img: "photos/cartier-panthere.avif", status: "watching" },
+    { brand: "Dior",            name: "Saddle bag",      img: "photos/dior-saddle.webp", gallery: ["photos/dior-saddle-02.png"], status: "watching" },
+    { brand: "Uniqlo",          name: "Assorted shirts", img: "photos/uniqlo-shirts.jpg",     status: "hunting"  },
+    { brand: "Comme des Garçons", name: "Halter top",    img: "photos/cdg-halter-top.jpg",    status: "watching" }
   ],
   entries: [
     {
-      id: "001",
-      date: "2026-05-12",
-      city: "tokyo",
-      location: "Shibuya, Tokyo",
-      caption: "Landed at dusk. Neon doing the talking.",
-      ratio: "tall"
-    },
-    {
-      id: "002",
-      date: "2026-05-13",
-      city: "tokyo",
-      location: "Daikanyama, Tokyo",
-      caption: "Aya disappeared into the third store on the block.",
-      shop: { name: "Okura", minutes: 47, eyed: 14, bought: 1 }
-    },
-    {
-      id: "003",
-      date: "2026-05-15",
-      city: "kyoto",
-      location: "Higashiyama, Kyoto",
-      caption: "Lanterns starting up the slope toward Kiyomizu.",
-      ratio: "wide"
-    },
-    {
-      id: "004",
-      date: "2026-05-15",
-      city: "kyoto",
-      location: "Gion, Kyoto",
-      caption: "She'd been eyeing the indigo scarf since Tokyo.",
-      shop: { name: "Sou Sou", minutes: 62, eyed: 22, bought: 2 }
-    },
-    {
-      id: "005",
+      id: "beams",
       date: "2026-05-17",
       city: "osaka",
-      location: "Dotonbori, Osaka",
-      caption: "Takoyaki, twice. No regrets.",
-      ratio: "square"
+      location: "Osaka",
+      src: "photos/beams-osaka.png",
+      shop: { name: "BEAMS", minutes: 30 }
     },
     {
-      id: "006",
+      id: "kindal",
       date: "2026-05-18",
       city: "osaka",
       location: "Amerikamura, Osaka",
-      src: "photos/ragtag-osaka.svg",
-      gallery: ["photos/ragtag-osaka-2.svg", "photos/ragtag-osaka-3.svg"],
-      ratio: "tall",
-      shop: { name: "RAGTAG", minutes: 35, eyed: 14, bought: 1 }
+      src: "photos/kindal-osaka.png",
+      shop: { name: "Kindal", minutes: 25 }
     },
     {
-      id: "007",
-      date: "2026-05-18",
-      city: "osaka",
-      location: "Amerikamura, Osaka",
-      src: "photos/kindal-osaka.svg",
-      ratio: "tall",
-      shop: { name: "Kindal", minutes: 25, eyed: 8, bought: 1 }
-    },
-    {
-      id: "008",
+      id: "drugstore",
       date: "2026-05-19",
-      city: "osaka",
-      location: "Shinsaibashi, Osaka",
-      src: "photos/komehyo-osaka.svg",
-      gallery: ["photos/komehyo-osaka-2.svg", "photos/komehyo-osaka-3.svg"],
-      ratio: "tall",
-      shop: { name: "Komehyo", minutes: 50, eyed: 22, bought: 3 }
-    },
-    {
-      id: "009",
-      date: "2026-05-19",
-      city: "osaka",
-      location: "Osaka",
-      src: "photos/allu-osaka.svg",
-      ratio: "tall",
-      shop: { name: "ALLU", minutes: 20, eyed: 0, bought: 0 }
-    },
-    {
-      id: "010",
-      date: "2026-05-19",
-      city: "osaka",
-      location: "Umeda, Osaka",
-      src: "photos/2ndstreet-osaka.svg",
-      ratio: "tall",
-      shop: { name: "2nd STREET", minutes: 18, eyed: 7, bought: 0 }
-    },
-    {
-      id: "011",
-      date: "2026-05-20",
-      city: "osaka",
-      location: "Osaka",
-      src: "photos/head-spa-osaka.png",
-      shop: { name: "Head Spa", minutes: 150 }
-    },
-    {
-      id: "012",
-      date: "2026-05-20",
       city: "osaka",
       location: "Osaka",
       src: "photos/osaka-drugstore.png",
       shop: { name: "Drug Store", minutes: 20 }
     },
     {
-      id: "013",
+      id: "museum",
       date: "2026-05-20",
       city: "osaka",
       location: "Osaka",
-      src: "photos/beams-osaka.png",
-      shop: { name: "BEAMS", minutes: 30 }
+      src: "photos/osaka-national-museum.png",
+      shop: { name: "Osaka National Museum — cat shirt search", minutes: 60 }
+    },
+    {
+      id: "headspa",
+      date: "2026-05-21",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/head-spa-osaka.png",
+      shop: { name: "Head Spa", minutes: 150 }
     }
   ]
 };
