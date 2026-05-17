@@ -517,7 +517,6 @@
         <div class="port-balance">${fmtMoney(total)}</div>
         <div class="port-net ${profitColorClass}">${profitSign}${fmtMoney(Math.abs(profit))} <span class="port-pct">${profitSign}${Math.abs(profitPct).toFixed(1)}%</span></div>
       </div>
-      <div class="port-sub">Cash ${fmtMoney(wallet.balance)} · Positions ${fmtMoney(positionsValue)}</div>
     `;
   }
 
