@@ -105,11 +105,13 @@
       if (entry.shop.bought != null) p.push(`${entry.shop.bought} bought`);
       statsText = p.join(" · ");
     }
+    const bodyText = entry.body || "";
     return `
       <article class="entry" data-id="${escapeAttr(entry.id)}" data-city="${escapeAttr(entry.city || "")}" data-count="${Math.max(1, srcs.length)}" data-index="0">
         ${imgs ? `<div class="entry-img-stack">${imgs}</div>` : ""}
         <div class="entry-meta">
           <div class="entry-shop">${escapeHtml(primary || "")}</div>
+          ${bodyText ? `<p class="entry-body">${escapeHtml(bodyText)}</p>` : ""}
           ${placeText ? `<div class="entry-place">${escapeHtml(placeText)}</div>` : ""}
           ${statsText ? `<div class="entry-stats">${escapeHtml(statsText)}</div>` : ""}
         </div>

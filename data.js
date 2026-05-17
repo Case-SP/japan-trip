@@ -39,7 +39,8 @@ window.TRIP = {
       city: "osaka",
       location: "Osaka",
       src: "photos/osaka-national-museum.jpg",
-      shop: { name: "Osaka National Museum — cat shirt search", minutes: 60 }
+      body: "Cat shirt search.",
+      shop: { name: "Osaka National Museum", minutes: 60 }
     },
     {
       id: "headspa",
