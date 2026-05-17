@@ -53,7 +53,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   font-size: 16px;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  color: var(--ink-muted);
+  color: var(--ink);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
