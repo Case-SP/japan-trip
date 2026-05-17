@@ -3,9 +3,8 @@ window.TRIP = {
   dates: "May 2026",
   coveted: [
     // status: "watching" | "hunting" | "bought"
-    // add img: "photos/coveted/cartier-panthere.jpg" to swap the placeholder
-    { brand: "Cartier",         name: "Panthère watch",    status: "watching" },
-    { brand: "Dior",            name: "Saddle bag",        status: "watching" },
+    { brand: "Cartier",         name: "Panthère watch",    img: "photos/cartier-panthere.avif", status: "watching" },
+    { brand: "Dior",            name: "Saddle bag",        img: "photos/dior-saddle.webp",      status: "watching" },
     { brand: "Uniqlo",          name: "Assorted shirts",   status: "hunting"  },
     { brand: "Maison Margiela", name: "Dress",             status: "watching" }
   ],
