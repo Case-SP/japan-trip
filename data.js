@@ -4,13 +4,22 @@ window.TRIP = {
   coveted: [
     // status: "watching" | "hunting" | "bought"
     { brand: "Cartier",           name: "Panthère watch",  img: "photos/cartier-panthere.avif",                                              status: "watching" },
-    { brand: "Dior",              name: "Saddle bag",      img: "photos/dior-saddle.webp", gallery: ["photos/dior-saddle-02.jpg"],            status: "watching" },
+    { brand: "Dior",              name: "Saddle bag",      img: "photos/dior-saddle.jpg",  gallery: ["photos/dior-saddle-02.jpg"],            status: "watching" },
     { brand: "Uniqlo",            name: "Assorted shirts", img: "photos/uniqlo-shirts.jpg",                                                  status: "hunting"  },
     { brand: "Comme des Garçons", name: "Halter top",      img: "photos/cdg-halter-top.jpg",                                                 status: "watching" },
-    { brand: "BEAMS",             name: "Cotton beanie",                                                                                     status: "bought"   },
-    { brand: "",                  name: "Sailor Moon shirt",                                                                                 status: "watching" }
+    { brand: "Issey Miyake",      name: "Fiber Mini",                                                                                        status: "watching" },
+    { brand: "BEAMS",             name: "Cotton beanie",   img: "photos/beams-beanie.jpg",                                                   status: "bought"   },
+    { brand: "",                  name: "Sailor Moon shirt", img: "photos/sailor-moon-shirt.jpg",                                            status: "watching" }
   ],
   entries: [
+    {
+      id: "issey-miyake",
+      date: "2026-05-16",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/osaka-issey-miyake.jpg",
+      shop: { name: "Issey Miyake", minutes: 15 }
+    },
     {
       id: "beams",
       date: "2026-05-17",
