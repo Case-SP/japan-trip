@@ -41,7 +41,7 @@
         card.innerHTML = `
           ${imgBlock}
           <div class="cov-meta">
-            ${c.brand ? `<div class="cov-brand">${escapeHtml(c.brand)}</div>` : ""}
+            <div class="cov-brand">${escapeHtml(c.brand || "—")}</div>
             <div class="cov-name">${escapeHtml(c.name || "")}</div>
             ${c.status ? `<div class="cov-status${statusCls}">${escapeHtml(c.status)}</div>` : ""}
           </div>
