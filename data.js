@@ -35,7 +35,8 @@ window.TRIP = {
       city: "osaka",
       location: "Osaka",
       src: "photos/osaka-familymart.jpg",
-      shop: { name: "FamilyMart" }
+      body: "Multiple runs to this mart, daily.",
+      shop: { name: "FamilyMart", minutes: 115 }
     },
     {
       id: "kindal",
