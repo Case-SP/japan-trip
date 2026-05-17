@@ -41,7 +41,7 @@
         card.innerHTML = `
           ${imgBlock}
           <div class="cov-meta">
-            <div class="cov-brand">${escapeHtml(c.brand || "")}</div>
+            ${c.brand ? `<div class="cov-brand">${escapeHtml(c.brand)}</div>` : ""}
             <div class="cov-name">${escapeHtml(c.name || "")}</div>
             ${c.status ? `<div class="cov-status${statusCls}">${escapeHtml(c.status)}</div>` : ""}
           </div>
@@ -97,10 +97,10 @@
       : "";
     const primary = entry.shop ? entry.shop.name : entry.location;
     const placeText = entry.shop ? entry.location : "";
+    const timeText = entry.shop && entry.shop.minutes != null ? `${entry.shop.minutes} min` : "";
     let statsText = "";
     if (entry.shop) {
       const p = [];
-      if (entry.shop.minutes != null) p.push(`${entry.shop.minutes} min`);
       if (entry.shop.eyed != null) p.push(`${entry.shop.eyed} eyed`);
       if (entry.shop.bought != null) p.push(`${entry.shop.bought} bought`);
       statsText = p.join(" · ");
@@ -110,7 +110,10 @@
       <article class="entry" data-id="${escapeAttr(entry.id)}" data-city="${escapeAttr(entry.city || "")}" data-count="${Math.max(1, srcs.length)}" data-index="0">
         ${imgs ? `<div class="entry-img-stack">${imgs}</div>` : ""}
         <div class="entry-meta">
-          <div class="entry-shop">${escapeHtml(primary || "")}</div>
+          <div class="entry-row-title">
+            <span class="entry-shop">${escapeHtml(primary || "")}</span>
+            ${timeText ? `<span class="entry-time">${escapeHtml(timeText)}</span>` : ""}
+          </div>
           ${bodyText ? `<p class="entry-body">${escapeHtml(bodyText)}</p>` : ""}
           ${placeText ? `<div class="entry-place">${escapeHtml(placeText)}</div>` : ""}
           ${statsText ? `<div class="entry-stats">${escapeHtml(statsText)}</div>` : ""}

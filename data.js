@@ -3,10 +3,12 @@ window.TRIP = {
   dates: "May 2026",
   coveted: [
     // status: "watching" | "hunting" | "bought"
-    { brand: "Cartier",         name: "Panthère watch",  img: "photos/cartier-panthere.avif", status: "watching" },
-    { brand: "Dior",            name: "Saddle bag",      img: "photos/dior-saddle.webp", gallery: ["photos/dior-saddle-02.jpg"], status: "watching" },
-    { brand: "Uniqlo",          name: "Assorted shirts", img: "photos/uniqlo-shirts.jpg",     status: "hunting"  },
-    { brand: "Comme des Garçons", name: "Halter top",    img: "photos/cdg-halter-top.jpg",    status: "watching" }
+    { brand: "Cartier",           name: "Panthère watch",  img: "photos/cartier-panthere.avif",                                              status: "watching" },
+    { brand: "Dior",              name: "Saddle bag",      img: "photos/dior-saddle.webp", gallery: ["photos/dior-saddle-02.jpg"],            status: "watching" },
+    { brand: "Uniqlo",            name: "Assorted shirts", img: "photos/uniqlo-shirts.jpg",                                                  status: "hunting"  },
+    { brand: "Comme des Garçons", name: "Halter top",      img: "photos/cdg-halter-top.jpg",                                                 status: "watching" },
+    { brand: "BEAMS",             name: "Cotton beanie",                                                                                     status: "bought"   },
+    { brand: "",                  name: "Sailor Moon shirt",                                                                                 status: "watching" }
   ],
   entries: [
     {
@@ -15,7 +17,8 @@ window.TRIP = {
       city: "osaka",
       location: "Osaka",
       src: "photos/beams-osaka.jpg",
-      shop: { name: "BEAMS", minutes: 30 }
+      body: "1/4 Beams visited. Men's only store.",
+      shop: { name: "BEAMS", minutes: 12 }
     },
     {
       id: "kindal",
