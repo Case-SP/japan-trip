@@ -6,7 +6,7 @@ window.TRIP = {
     { brand: "Cartier",         name: "Panthère watch",    img: "photos/cartier-panthere.avif", status: "watching" },
     { brand: "Dior",            name: "Saddle bag",        img: "photos/dior-saddle.webp",      status: "watching" },
     { brand: "Uniqlo",          name: "Assorted shirts",   status: "hunting"  },
-    { brand: "Maison Margiela", name: "Dress",             status: "watching" }
+    { brand: "Comme des Garçons", name: "Halter top",      img: "photos/cdg-halter-top.jpg",    status: "watching" }
   ],
   entries: [
     {
