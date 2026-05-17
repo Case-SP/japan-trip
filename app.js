@@ -3,7 +3,7 @@
 
   // Cloudflare Worker URL — set this once you've deployed the votes Worker.
   // Leave empty until then; dashboard will render but voting is disabled.
-  const PREDICT_WORKER_URL = "";
+  const PREDICT_WORKER_URL = "https://coveted-votes.case-945.workers.dev";
 
   // Real lat/lon for visited cities — used by Leaflet
   const CITY_LATLON = {
