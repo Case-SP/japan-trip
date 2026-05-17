@@ -18,6 +18,30 @@
     fukuoka:   { x: 78,  y: 272, lx: 68,  ly: 275, anchor: "end" }
   };
 
+  const coveted = (window.TRIP && window.TRIP.coveted) || [];
+  const covGrid = document.getElementById("coveted-grid");
+  if (covGrid) {
+    if (coveted.length) {
+      coveted.forEach(c => {
+        const card = document.createElement("article");
+        card.className = "cov-card";
+        const imgBlock = c.img
+          ? `<div class="cov-img"><img loading="lazy" src="${escapeAttr(c.img)}" alt="${escapeAttr(c.name)}"></div>`
+          : `<div class="cov-img"><div class="cov-placeholder">${escapeHtml(c.name)}</div></div>`;
+        const statusCls = c.status ? ` ${c.status.toLowerCase()}` : "";
+        card.innerHTML = `
+          ${imgBlock}
+          <div class="cov-brand">${escapeHtml(c.brand || "")}</div>
+          <div class="cov-name">${escapeHtml(c.name || "")}</div>
+          ${c.status ? `<span class="cov-status${statusCls}">${escapeHtml(c.status)}</span>` : ""}
+        `;
+        covGrid.appendChild(card);
+      });
+    } else {
+      covGrid.parentElement.style.display = "none";
+    }
+  }
+
   const totalMin = data.reduce((s, e) => s + ((e.shop && e.shop.minutes) || 0), 0);
   const totalEyed = data.reduce((s, e) => s + ((e.shop && e.shop.eyed) || 0), 0);
   const totalBought = data.reduce((s, e) => s + ((e.shop && e.shop.bought) || 0), 0);

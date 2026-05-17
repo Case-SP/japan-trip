@@ -1,6 +1,14 @@
 window.TRIP = {
   title: "Japan",
   dates: "May 2026",
+  coveted: [
+    // status: "watching" | "hunting" | "bought"
+    // add img: "photos/coveted/cartier-panthere.jpg" to swap the placeholder
+    { brand: "Cartier",         name: "Panthère watch",    status: "watching" },
+    { brand: "Dior",            name: "Saddle bag",        status: "watching" },
+    { brand: "Uniqlo",          name: "Assorted shirts",   status: "hunting"  },
+    { brand: "Maison Margiela", name: "Dress",             status: "watching" }
+  ],
   entries: [
     {
       id: "001",

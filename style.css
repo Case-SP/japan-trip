@@ -75,6 +75,21 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .stat .num { display: block; font-family: var(--serif); font-weight: 300; font-size: 34px; line-height: 1; letter-spacing: -0.02em; }
 .stat .lbl { display: block; font-family: var(--sans); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin-top: 6px; }
 
+.coveted { padding: 26px 22px 4px; }
+.coveted-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.coveted-kicker { font-family: var(--sans); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); font-weight: 600; }
+.coveted-sub { font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--ink-soft); }
+.coveted-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+.cov-card { display: flex; flex-direction: column; gap: 6px; }
+.cov-img { position: relative; aspect-ratio: 1 / 1; background: #fff; border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; box-shadow: 0 1px 0 var(--shadow); }
+.cov-img img { width: 100%; height: 100%; object-fit: contain; padding: 14px; background: #fff; }
+.cov-img .cov-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #fdfaf2 0%, #efe5cf 100%); font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--ink-soft); padding: 16px; text-align: center; line-height: 1.3; }
+.cov-brand { font-family: var(--sans); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin-top: 4px; }
+.cov-name { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink); line-height: 1.2; }
+.cov-status { display: inline-block; font-family: var(--sans); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 9px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-soft); align-self: flex-start; margin-top: 4px; }
+.cov-status.bought { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.cov-status.hunting { border-color: var(--accent); color: var(--accent); }
+
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 18px 22px 6px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
 .chip { flex: 0 0 auto; font-family: var(--sans); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-soft); background: transparent; transition: all .18s ease; }
@@ -119,6 +134,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 @media (min-width: 720px) {
   body { font-size: 18px; }
-  .masthead, .stats, .chips, .entry, .colophon { max-width: 640px; margin-left: auto; margin-right: auto; }
+  .masthead, .stats, .coveted, .chips, .entry, .colophon { max-width: 640px; margin-left: auto; margin-right: auto; }
+  .coveted-grid { grid-template-columns: repeat(4, 1fr); }
   .feed { padding-top: 24px; }
 }
