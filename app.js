@@ -1,6 +1,10 @@
 (function () {
   const data = (window.TRIP && window.TRIP.entries) || [];
 
+  // Cloudflare Worker URL — set this once you've deployed the votes Worker.
+  // Leave empty until then; dashboard will render but voting is disabled.
+  const PREDICT_WORKER_URL = "";
+
   // Real lat/lon for visited cities — used by Leaflet
   const CITY_LATLON = {
     sapporo:   [43.07, 141.35],
@@ -294,9 +298,191 @@
     if (dy > 80) closeMapSheet();
   }, { passive: true });
 
+  /* ── Predict sheet (Polymarket-style) ────────────────── */
+  const predictTrigger = document.getElementById("predict-trigger");
+  const predictSheet = document.getElementById("predict-sheet");
+  const predictBackdrop = document.getElementById("predict-backdrop");
+  const predictClose = document.getElementById("predict-close");
+  const predictContent = document.getElementById("predict-content");
+  let predictRendered = false;
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function itemSlug(c) {
+    return ((c.brand || "x") + "-" + c.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+  function predictId(slug, question) {
+    return question === "today" ? `${slug}:today:${todayKey()}` : `${slug}:all`;
+  }
+  function pct(yes, no) {
+    const t = (yes || 0) + (no || 0);
+    return t === 0 ? null : Math.round((yes / t) * 100);
+  }
+  async function fetchTally(id) {
+    if (!PREDICT_WORKER_URL) return null;
+    try {
+      const r = await fetch(`${PREDICT_WORKER_URL}?id=${encodeURIComponent(id)}`);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (e) { return null; }
+  }
+  async function castVote(id, vote) {
+    if (!PREDICT_WORKER_URL) return null;
+    try {
+      const r = await fetch(`${PREDICT_WORKER_URL}?id=${encodeURIComponent(id)}&vote=${vote}`, { method: "POST" });
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (e) { return null; }
+  }
+
+  function renderQuestionBlock(slug, question, label) {
+    return `
+      <div class="predict-q" data-q="${question}">
+        <div class="predict-q-label">${escapeHtml(label)}</div>
+        <div class="predict-q-bar"><div class="predict-q-fill" style="width:0%"></div></div>
+        <div class="predict-q-row">
+          <span class="predict-q-pct">—</span>
+          <span class="predict-q-counts">0 yes · 0 no</span>
+          <div class="predict-q-btns">
+            <button class="predict-vote" data-slug="${escapeAttr(slug)}" data-q="${question}" data-vote="yes"${PREDICT_WORKER_URL ? "" : " disabled"}>Yes</button>
+            <button class="predict-vote" data-slug="${escapeAttr(slug)}" data-q="${question}" data-vote="no"${PREDICT_WORKER_URL ? "" : " disabled"}>No</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateQuestionRow(slug, question, tally) {
+    const row = predictContent.querySelector(`.predict-row[data-slug="${slug}"] .predict-q[data-q="${question}"]`);
+    if (!row) return;
+    const yes = (tally && tally.yes) || 0;
+    const no = (tally && tally.no) || 0;
+    const p = pct(yes, no);
+    row.querySelector(".predict-q-fill").style.width = (p == null ? 0 : p) + "%";
+    row.querySelector(".predict-q-pct").textContent = (p == null ? "—" : p + "%");
+    row.querySelector(".predict-q-counts").textContent = `${yes} yes · ${no} no`;
+    const id = predictId(slug, question);
+    const voted = localStorage.getItem(`vote-${id}`);
+    if (voted) markVoted(slug, question, voted);
+  }
+
+  function markVoted(slug, question, vote) {
+    const row = predictContent.querySelector(`.predict-row[data-slug="${slug}"] .predict-q[data-q="${question}"]`);
+    if (!row) return;
+    row.querySelectorAll(".predict-vote").forEach(b => {
+      b.classList.toggle("voted", b.dataset.vote === vote);
+      b.disabled = true;
+    });
+  }
+
+  function renderPredictDashboard() {
+    if (predictRendered) return;
+    predictRendered = true;
+    const items = coveted.filter(c => c.status !== "bought");
+    const notice = PREDICT_WORKER_URL ? "" : `<div class="predict-notice">Voting is offline — set <code>PREDICT_WORKER_URL</code> in <code>app.js</code> to enable.</div>`;
+    const rows = items.map(c => {
+      const slug = itemSlug(c);
+      const imgTag = c.img
+        ? `<img class="predict-thumb" loading="lazy" src="${escapeAttr(c.img)}" alt="" onerror="this.style.visibility='hidden'">`
+        : `<div class="predict-thumb"></div>`;
+      return `
+        <div class="predict-row" data-slug="${escapeAttr(slug)}">
+          <div class="predict-row-head">
+            ${imgTag}
+            <div>
+              <div class="predict-name">${escapeHtml(c.name)}</div>
+              <div class="predict-brand">${escapeHtml(c.brand || "—")}</div>
+            </div>
+          </div>
+          ${renderQuestionBlock(slug, "all", "Will she find it at all?")}
+          ${renderQuestionBlock(slug, "today", "Will she find it today?")}
+        </div>
+      `;
+    }).join("");
+    predictContent.innerHTML = notice + rows;
+
+    items.forEach(c => {
+      const slug = itemSlug(c);
+      ["all", "today"].forEach(async q => {
+        const tally = await fetchTally(predictId(slug, q));
+        updateQuestionRow(slug, q, tally);
+      });
+    });
+
+    predictContent.querySelectorAll(".predict-vote").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const slug = btn.dataset.slug;
+        const q = btn.dataset.q;
+        const vote = btn.dataset.vote;
+        const id = predictId(slug, q);
+        const lsKey = `vote-${id}`;
+        if (localStorage.getItem(lsKey)) return;
+        markVoted(slug, q, vote);
+        localStorage.setItem(lsKey, vote);
+        const tally = await castVote(id, vote);
+        if (tally) updateQuestionRow(slug, q, tally);
+      });
+    });
+  }
+
+  function openPredictSheet() {
+    renderPredictDashboard();
+    predictBackdrop.hidden = false;
+    requestAnimationFrame(() => {
+      predictBackdrop.classList.add("is-open");
+      predictSheet.classList.add("is-open");
+    });
+    predictSheet.setAttribute("aria-hidden", "false");
+    predictTrigger.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+  function closePredictSheet() {
+    predictBackdrop.classList.remove("is-open");
+    predictSheet.classList.remove("is-open");
+    predictSheet.setAttribute("aria-hidden", "true");
+    predictTrigger.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+    setTimeout(() => { predictBackdrop.hidden = true; }, 320);
+  }
+
+  predictTrigger.addEventListener("click", () => {
+    if (predictSheet.classList.contains("is-open")) closePredictSheet();
+    else openPredictSheet();
+  });
+  predictClose.addEventListener("click", closePredictSheet);
+  predictBackdrop.addEventListener("click", closePredictSheet);
+
+  let pDragStartY = null;
+  let pDraggingHeader = false;
+  predictSheet.addEventListener("touchstart", (ev) => {
+    const head = predictSheet.querySelector(".map-sheet-head");
+    if (head && head.contains(ev.target)) {
+      pDraggingHeader = true;
+      pDragStartY = ev.touches[0].clientY;
+    }
+  }, { passive: true });
+  predictSheet.addEventListener("touchmove", (ev) => {
+    if (!pDraggingHeader || pDragStartY == null) return;
+    const dy = ev.touches[0].clientY - pDragStartY;
+    if (dy > 0) predictSheet.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+  predictSheet.addEventListener("touchend", (ev) => {
+    if (!pDraggingHeader || pDragStartY == null) return;
+    const dy = ev.changedTouches[0].clientY - pDragStartY;
+    predictSheet.style.transform = "";
+    pDraggingHeader = false;
+    pDragStartY = null;
+    if (dy > 80) closePredictSheet();
+  }, { passive: true });
+
   /* ── Global keys ─────────────────────────────────────── */
   document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" && mapSheet.classList.contains("is-open")) closeMapSheet();
+    if (ev.key === "Escape") {
+      if (mapSheet.classList.contains("is-open")) closeMapSheet();
+      else if (predictSheet.classList.contains("is-open")) closePredictSheet();
+    }
   });
 
   /* ── Utils ───────────────────────────────────────────── */

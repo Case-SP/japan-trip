@@ -19,7 +19,10 @@
     <span class="brand-sep">·</span>
     <span id="stat-bought">0</span>
   </div>
-  <button class="brand-dot" id="map-trigger" aria-label="Open map" aria-controls="map-sheet" aria-expanded="false"></button>
+  <div class="brand-controls">
+    <button class="brand-dot brand-predict" id="predict-trigger" aria-label="Open predictions" aria-controls="predict-sheet" aria-expanded="false"></button>
+    <button class="brand-dot" id="map-trigger" aria-label="Open map" aria-controls="map-sheet" aria-expanded="false"></button>
+  </div>
 </header>
 
 <section class="section coveted" aria-label="Coveted objects">
@@ -43,6 +46,16 @@
     <button class="map-close" id="map-close" aria-label="Close map">&times;</button>
   </div>
   <div id="leaflet-map" class="leaflet-map"></div>
+</aside>
+
+<div id="predict-backdrop" class="map-backdrop" hidden></div>
+<aside id="predict-sheet" class="map-sheet predict-sheet" aria-hidden="true" aria-label="Predictions">
+  <div class="map-sheet-head">
+    <span class="map-handle" aria-hidden="true"></span>
+    <div class="map-sheet-title">Will she find it?</div>
+    <button class="map-close" id="predict-close" aria-label="Close predictions">&times;</button>
+  </div>
+  <div id="predict-content" class="predict-content"></div>
 </aside>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
