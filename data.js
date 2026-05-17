@@ -101,7 +101,7 @@ window.TRIP = {
       date: "2026-05-20",
       city: "osaka",
       location: "Osaka",
-      src: "photos/head-spa-osaka.heic",
+      src: "photos/head-spa-osaka.png",
       shop: { name: "Head Spa", minutes: 150 }
     },
     {
@@ -117,7 +117,7 @@ window.TRIP = {
       date: "2026-05-20",
       city: "osaka",
       location: "Osaka",
-      src: "photos/beams-osaka.jpg",
+      src: "photos/beams-osaka.png",
       shop: { name: "BEAMS", minutes: 30 }
     }
   ]
