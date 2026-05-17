@@ -51,13 +51,49 @@ window.TRIP = {
       ratio: "square"
     },
     {
+      id: "006",
+      date: "2026-05-18",
+      city: "osaka",
+      location: "Amerikamura, Osaka",
+      src: "photos/ragtag-osaka.svg",
+      ratio: "tall",
+      shop: { name: "RAGTAG", minutes: 35, eyed: 14, bought: 1 }
+    },
+    {
+      id: "007",
+      date: "2026-05-18",
+      city: "osaka",
+      location: "Amerikamura, Osaka",
+      src: "photos/kindal-osaka.svg",
+      ratio: "tall",
+      shop: { name: "Kindal", minutes: 25, eyed: 8, bought: 1 }
+    },
+    {
+      id: "008",
+      date: "2026-05-19",
+      city: "osaka",
+      location: "Shinsaibashi, Osaka",
+      src: "photos/komehyo-osaka.svg",
+      ratio: "tall",
+      shop: { name: "Komehyo", minutes: 50, eyed: 22, bought: 3 }
+    },
+    {
       id: "009",
       date: "2026-05-19",
       city: "osaka",
       location: "Osaka",
-      src: "photos/allu-osaka.jpg",
+      src: "photos/allu-osaka.svg",
       ratio: "tall",
       shop: { name: "ALLU", minutes: 20, eyed: 0, bought: 0 }
+    },
+    {
+      id: "010",
+      date: "2026-05-19",
+      city: "osaka",
+      location: "Umeda, Osaka",
+      src: "photos/2ndstreet-osaka.svg",
+      ratio: "tall",
+      shop: { name: "2nd STREET", minutes: 18, eyed: 7, bought: 0 }
     }
   ]
 };
