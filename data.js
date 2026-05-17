@@ -8,7 +8,7 @@ window.TRIP = {
     { brand: "Uniqlo",            name: "Assorted shirts", img: "photos/uniqlo-shirts.jpg",                                                  status: "hunting"  },
     { brand: "Comme des Garçons", name: "Halter top",      img: "photos/cdg-halter-top.jpg",                                                 status: "watching" },
     { brand: "Issey Miyake",      name: "Fiber Mini",      img: "photos/fiber-mini.png",                                                     status: "watching" },
-    { brand: "BEAMS",             name: "Cotton beanie",   img: "photos/beams-beanie.jpg",                                                   status: "bought"   },
+    { brand: "BEAMS",             name: "Cotton beanie",                                                                                     status: "bought"   },
     { brand: "",                  name: "Sailor Moon shirt", img: "photos/sailor-moon-shirt.jpg",                                            status: "watching" }
   ],
   entries: [
@@ -28,6 +28,14 @@ window.TRIP = {
       location: "Osaka",
       src: "photos/osaka-issey-miyake.jpg",
       shop: { name: "Issey Miyake", minutes: 15 }
+    },
+    {
+      id: "familymart",
+      date: "2026-05-17",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/osaka-familymart.jpg",
+      shop: { name: "FamilyMart" }
     },
     {
       id: "kindal",
