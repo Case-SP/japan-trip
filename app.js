@@ -30,7 +30,7 @@
         const card = document.createElement("article");
         card.className = "cov-card";
         const imgBlock = c.img
-          ? `<img loading="lazy" src="${escapeAttr(c.img)}" alt="${escapeAttr(c.name)}">`
+          ? `<img loading="lazy" src="${escapeAttr(c.img)}" alt="${escapeAttr(c.name)}" onerror="this.style.visibility='hidden'">`
           : `<div class="cov-placeholder"></div>`;
         const statusCls = c.status ? ` ${c.status.toLowerCase()}` : "";
         card.innerHTML = `
@@ -69,7 +69,7 @@
   function buildCardHTML(entry) {
     const srcs = [entry.src, ...(entry.gallery || [])].filter(Boolean);
     const imgs = srcs.length
-      ? srcs.map((s, i) => `<img loading="lazy" src="${escapeAttr(s)}" class="card-img${i === 0 ? " is-on" : ""}" alt="">`).join("")
+      ? srcs.map((s, i) => `<img loading="lazy" src="${escapeAttr(s)}" class="card-img${i === 0 ? " is-on" : ""}" alt="" onerror="this.style.visibility='hidden'">`).join("")
       : `<div class="card-placeholder"></div>`;
     const primary = entry.shop ? entry.shop.name : entry.location;
     const placeText = entry.shop ? entry.location : "";

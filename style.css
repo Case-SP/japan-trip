@@ -121,12 +121,12 @@ body { padding-bottom: 80px; }
   aspect-ratio: 1 / 1;
   object-fit: contain;
   display: block;
-  background: var(--paper-deep);
+  background: var(--paper);
 }
 .cov-placeholder {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: var(--paper-deep);
+  background: var(--paper);
   display: block;
 }
 .cov-meta {
@@ -185,7 +185,7 @@ body { padding-bottom: 80px; }
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 5;
-  background: var(--paper-deep);
+  background: var(--paper);
   overflow: hidden;
 }
 .card-img {
@@ -194,10 +194,10 @@ body { padding-bottom: 80px; }
   object-fit: contain;
   opacity: 0;
   transition: opacity 300ms ease;
-  background: var(--paper-deep);
+  background: var(--paper);
 }
 .card-img.is-on { opacity: 1; }
-.card-placeholder { position: absolute; inset: 0; background: var(--paper-deep); }
+.card-placeholder { position: absolute; inset: 0; background: var(--paper); }
 
 .card-meta {
   padding: 8px 0 0;
