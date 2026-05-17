@@ -5,32 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#e7e3dd">
 <title>Japan — A Field Journal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header class="brand-bar">
-  <span class="brand-mark" id="brand-mark">Field Journal</span>
-  <span class="brand-dot" aria-hidden="true"></span>
+  <span class="brand-mark">Field Journal</span>
+  <button class="brand-dot" id="map-trigger" aria-label="Open map" aria-controls="map-sheet" aria-expanded="false"></button>
 </header>
 
 <section class="masthead">
   <h1 class="title">Japan</h1>
   <p class="subtitle"><em>A field journal of one trip, with shopping waits.</em></p>
-</section>
-
-<section class="map-section" aria-label="Map of Japan">
-  <svg id="jp-map" viewBox="0 0 200 320" role="img" aria-label="Japan, with visited cities">
-    <g class="land">
-      <path d="M 120 30 C 142 22 168 33 170 55 C 170 75 148 82 130 76 C 112 70 104 45 120 30 Z"/>
-      <path d="M 92 102 C 88 118 96 134 110 144 L 142 162 C 156 170 170 178 180 184 C 192 192 195 207 184 213 C 170 220 154 222 138 218 C 122 213 108 198 100 178 C 92 158 86 138 88 118 C 88 110 88 105 92 102 Z"/>
-      <path d="M 130 235 C 146 230 156 240 152 252 C 146 262 130 260 124 250 C 120 242 122 237 130 235 Z"/>
-      <path d="M 72 248 C 90 240 105 254 104 274 C 102 292 84 297 70 290 C 56 280 56 256 72 248 Z"/>
-    </g>
-    <g class="route" id="map-route"></g>
-    <g class="cities" id="map-cities"></g>
-  </svg>
-  <p class="map-note">Tap a city to filter</p>
 </section>
 
 <section class="section ledger-section" aria-label="Shopping ledger">
@@ -65,6 +52,16 @@
   <p id="trip-dates">May 2026</p>
 </footer>
 
+<div id="map-backdrop" class="map-backdrop" hidden></div>
+<aside id="map-sheet" class="map-sheet" aria-hidden="true" aria-label="Trip map">
+  <div class="map-sheet-head">
+    <span class="map-handle" aria-hidden="true"></span>
+    <div class="map-sheet-title">Route</div>
+    <button class="map-close" id="map-close" aria-label="Close map">&times;</button>
+  </div>
+  <div id="leaflet-map" class="leaflet-map"></div>
+</aside>
+
 <div id="lightbox" class="lightbox" hidden>
   <button class="lb-close" aria-label="Close">&times;</button>
   <figure class="lb-figure">
@@ -75,6 +72,7 @@
   <button class="lb-next" aria-label="Next">&rarr;</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
