@@ -2,13 +2,11 @@
   --paper: #e7e3dd;
   --paper-deep: #d8d4cd;
   --ink: #2a2a2a;
-  --ink-mid: #6e6a64;
-  --ink-soft: #9a9690;
-  --rule: #cdc8c0;
+  --ink-muted: rgba(42, 42, 42, 0.5);
+  --rule: rgba(42, 42, 42, 0.18);
   --white: #ffffff;
   --shadow: rgba(40,40,40,0.04);
   --sans: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", system-ui, sans-serif;
-  --serif: ui-serif, "New York", "Charter", "Iowan Old Style", Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -19,12 +17,14 @@ body {
   color: var(--ink);
   font-family: var(--sans);
   font-weight: 400;
-  font-size: 17px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.25;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+em, i { font-style: normal; }
 
 img { max-width: 100%; display: block; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -38,13 +38,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  padding-top: calc(16px + env(safe-area-inset-top));
+  padding: 14px 24px;
+  padding-top: calc(14px + env(safe-area-inset-top));
 }
 .brand-mark {
   font-size: 16px;
-  color: var(--ink-mid);
-  letter-spacing: -0.005em;
+  line-height: 1.2;
+  color: var(--ink-muted);
 }
 .brand-dot {
   width: 32px; height: 32px;
@@ -64,53 +64,205 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   width: 11px; height: 11px;
   border-radius: 50%;
   background: var(--ink);
-  transition: transform .15s ease, background .15s ease;
+  transition: transform .15s ease;
 }
 .brand-dot:active::before { transform: scale(1.25); }
-.brand-dot[aria-expanded="true"]::before { background: var(--ink); transform: scale(1.3); }
+.brand-dot[aria-expanded="true"]::before { transform: scale(1.3); }
 
 /* ── Masthead ─────────────────────────────────────────── */
 .masthead {
-  padding: 72px 24px 56px;
+  padding: 56px 24px 40px;
 }
 .title {
-  font-size: 56px;
-  line-height: 1.0;
-  letter-spacing: -0.025em;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   font-weight: 400;
   color: var(--ink);
-  margin: 0 0 14px;
+  margin: 0 0 8px;
 }
 .subtitle {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 19px;
-  line-height: 1.35;
-  color: var(--ink-mid);
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--ink-muted);
   margin: 0;
-  max-width: 28ch;
+  max-width: 40ch;
 }
 
 /* ── Sections (generic) ───────────────────────────────── */
-.section {
-  padding: 0 24px 80px;
-}
+.section { padding: 0 24px 56px; }
 .section-head {
-  font-size: 40px;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   font-weight: 400;
   color: var(--ink);
-  margin: 0 0 24px;
+  margin: 0 0 20px;
 }
 .section-intro {
-  font-size: 17px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.3;
   color: var(--ink);
-  margin: 0 0 32px;
-  max-width: 40ch;
+  margin: 0 0 24px;
+  max-width: 50ch;
 }
+
+/* ── Ledger ───────────────────────────────────────────── */
+.ledger {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.stat { padding: 0; }
+.stat .num {
+  display: block;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+  color: var(--ink);
+}
+.stat .lbl {
+  display: block;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  margin-top: 6px;
+}
+
+/* ── Coveted ──────────────────────────────────────────── */
+.coveted-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 14px;
+}
+.cov-card { display: flex; flex-direction: column; }
+.cov-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.cov-img img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 14px;
+  background: var(--white);
+}
+.cov-placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--paper-deep);
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  padding: 16px;
+  text-align: center;
+}
+.cov-brand {
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  margin-top: 10px;
+}
+.cov-name {
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-top: 2px;
+}
+.cov-status {
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+
+/* ── Chips ────────────────────────────────────────────── */
+.chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin: 0 -24px 28px;
+  padding: 0 24px 4px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  transition: all .14s ease;
+}
+.chip.is-on {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* ── Feed / entries ───────────────────────────────────── */
+.feed { display: flex; flex-direction: column; gap: 44px; }
+.entry { display: flex; flex-direction: column; }
+.entry.hidden { display: none; }
+
+.photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--paper-deep);
+  cursor: zoom-in;
+}
+.photo.wide { aspect-ratio: 3 / 2; }
+.photo.tall { aspect-ratio: 3 / 4; }
+.photo.square { aspect-ratio: 1 / 1; }
+.photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo .placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--paper-deep);
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
+  padding: 16px;
+  text-align: center;
+}
+
+.entry-cap {
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--ink-muted);
+  margin: 10px 0 0;
+}
+.entry-note {
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--ink-muted);
+  margin: 8px 0 0;
+  max-width: 50ch;
+}
+.wait {
+  font-size: 16px;
+  line-height: 1.25;
+  color: var(--ink-muted);
+  margin: 8px 0 0;
+}
+.wait strong { color: var(--ink); font-weight: 500; }
+
+/* ── Colophon ─────────────────────────────────────────── */
+.colophon {
+  padding: 24px 24px 80px;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--ink-muted);
+}
+.colophon p { margin: 0 0 2px; }
 
 /* ── Map sheet (half-sheet drawer) ────────────────────── */
 .map-backdrop {
@@ -145,7 +297,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .map-sheet-head {
   position: relative;
   flex: 0 0 auto;
-  padding: 6px 14px 10px;
+  padding: 6px 14px 8px;
   border-bottom: 1px solid var(--rule);
 }
 .map-handle {
@@ -153,20 +305,20 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   width: 36px; height: 4px;
   background: var(--rule);
   border-radius: 2px;
-  margin: 6px auto 8px;
+  margin: 6px auto 6px;
 }
 .map-sheet-title {
-  font-size: 13px;
-  color: var(--ink-mid);
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink-muted);
   text-align: center;
-  margin-top: 2px;
 }
 .map-close {
   position: absolute;
   right: 4px; top: 4px;
   width: 40px; height: 40px;
   font-size: 22px;
-  color: var(--ink-mid);
+  color: var(--ink-muted);
   cursor: pointer;
 }
 .leaflet-map {
@@ -176,14 +328,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: var(--paper);
 }
 
-/* Leaflet visual tweaks to match the page palette */
+/* Leaflet visual tweaks */
 .leaflet-tooltip.city-label {
   background: transparent;
   border: 0;
   box-shadow: none;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.2;
   font-weight: 500;
   padding: 0 4px;
   text-shadow: 0 0 4px #fff, 0 0 6px #fff, 0 0 8px #fff;
@@ -192,162 +345,11 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .leaflet-container { font-family: var(--sans); }
 .leaflet-control-attribution {
   background: rgba(231, 227, 221, 0.85) !important;
-  font-size: 10px !important;
-  color: var(--ink-soft) !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  color: var(--ink-muted) !important;
 }
-.leaflet-control-attribution a { color: var(--ink-mid) !important; }
-
-/* ── Ledger ───────────────────────────────────────────── */
-.ledger {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-.stat { padding: 0; }
-.stat .num {
-  display: block;
-  font-size: 44px;
-  line-height: 1;
-  letter-spacing: -0.025em;
-  font-weight: 400;
-  color: var(--ink);
-}
-.stat .lbl {
-  display: block;
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-top: 8px;
-}
-
-/* ── Coveted ──────────────────────────────────────────── */
-.coveted-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px 14px;
-}
-.cov-card { display: flex; flex-direction: column; }
-.cov-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: var(--white);
-  position: relative;
-  overflow: hidden;
-}
-.cov-img img {
-  width: 100%; height: 100%;
-  object-fit: contain;
-  padding: 14px;
-  background: var(--white);
-}
-.cov-placeholder {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--paper-deep);
-  font-size: 13px;
-  color: var(--ink-soft);
-  padding: 16px;
-  text-align: center;
-  line-height: 1.3;
-}
-.cov-brand {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-top: 12px;
-}
-.cov-name {
-  font-size: 16px;
-  color: var(--ink);
-  line-height: 1.25;
-  margin-top: 2px;
-}
-.cov-status {
-  font-size: 12px;
-  color: var(--ink-soft);
-  margin-top: 6px;
-}
-.cov-status.bought { color: var(--ink); }
-
-/* ── Chips ────────────────────────────────────────────── */
-.chips {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin: 0 -24px 36px;
-  padding: 0 24px 4px;
-  scrollbar-width: none;
-}
-.chips::-webkit-scrollbar { display: none; }
-.chip {
-  flex: 0 0 auto;
-  font-size: 14px;
-  color: var(--ink-mid);
-  padding: 7px 14px;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: transparent;
-  transition: all .14s ease;
-}
-.chip.is-on {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
-}
-
-/* ── Feed / entries ───────────────────────────────────── */
-.feed { display: flex; flex-direction: column; gap: 60px; }
-.entry { display: flex; flex-direction: column; }
-.entry.hidden { display: none; }
-
-.photo {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  background: var(--paper-deep);
-  cursor: zoom-in;
-}
-.photo.wide { aspect-ratio: 3 / 2; }
-.photo.tall { aspect-ratio: 3 / 4; }
-.photo.square { aspect-ratio: 1 / 1; }
-.photo img { width: 100%; height: 100%; object-fit: cover; }
-.photo .placeholder {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--paper-deep);
-  font-size: 14px;
-  color: var(--ink-soft);
-  padding: 16px;
-  text-align: center;
-}
-
-.entry-cap {
-  font-size: 14px;
-  color: var(--ink-soft);
-  margin: 12px 0 0;
-}
-.entry-note {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 17px;
-  line-height: 1.4;
-  color: var(--ink-mid);
-  margin: 14px 0 0;
-  max-width: 40ch;
-}
-.wait {
-  font-size: 14px;
-  color: var(--ink-mid);
-  margin: 12px 0 0;
-}
-.wait strong { font-weight: 500; color: var(--ink); }
-
-/* ── Colophon ─────────────────────────────────────────── */
-.colophon {
-  padding: 24px 24px 80px;
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-.colophon p { margin: 0 0 4px; }
+.leaflet-control-attribution a { color: var(--ink-muted) !important; }
 
 /* ── Lightbox ─────────────────────────────────────────── */
 .lightbox {
@@ -371,33 +373,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .lb-imgwrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .lb-figure figcaption {
   font-family: var(--sans);
-  font-size: 14px;
-  color: #c9c4ba;
+  font-size: 16px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.5);
   text-align: center;
-  margin-top: 18px;
+  margin-top: 16px;
   max-width: 42ch;
-  line-height: 1.4;
 }
 .lb-close, .lb-prev, .lb-next {
   position: absolute;
-  color: #c9c4ba;
+  color: rgba(255, 255, 255, 0.5);
   width: 44px; height: 44px;
   display: flex; align-items: center; justify-content: center;
 }
-.lb-close { top: 10px; right: 10px; font-size: 28px; }
-.lb-prev { left: 6px; top: 50%; transform: translateY(-50%); font-size: 22px; }
-.lb-next { right: 6px; top: 50%; transform: translateY(-50%); font-size: 22px; }
+.lb-close { top: 10px; right: 10px; font-size: 24px; }
+.lb-prev { left: 6px; top: 50%; transform: translateY(-50%); font-size: 20px; }
+.lb-next { right: 6px; top: 50%; transform: translateY(-50%); font-size: 20px; }
 
 /* ── Wider screens ────────────────────────────────────── */
 @media (min-width: 720px) {
-  body { font-size: 18px; }
   .brand-bar, .masthead, .section, .colophon {
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
   }
-  .title { font-size: 96px; }
-  .section-head { font-size: 56px; }
-  .stat .num { font-size: 64px; }
-  .coveted-grid { grid-template-columns: repeat(4, 1fr); gap: 36px 18px; }
+  .coveted-grid { grid-template-columns: repeat(4, 1fr); gap: 32px 18px; }
 }
