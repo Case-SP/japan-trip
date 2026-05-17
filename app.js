@@ -298,13 +298,23 @@
     if (dy > 80) closeMapSheet();
   }, { passive: true });
 
-  /* ── Predict sheet (Polymarket-style) ────────────────── */
+  /* ── Predict sheet (Polymarket-style paper market) ───── */
   const predictTrigger = document.getElementById("predict-trigger");
   const predictSheet = document.getElementById("predict-sheet");
   const predictBackdrop = document.getElementById("predict-backdrop");
   const predictClose = document.getElementById("predict-close");
   const predictContent = document.getElementById("predict-content");
-  let predictRendered = false;
+
+  const STARTING_BALANCE = 1000;
+  const STAKE_PRESETS = [10, 50, 100];
+
+  // Admin token via ?admin=... URL param (stored in localStorage)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has("admin")) {
+    localStorage.setItem("admin-token", urlParams.get("admin"));
+    history.replaceState(null, "", window.location.pathname);
+  }
+  const adminToken = localStorage.getItem("admin-token");
 
   function todayKey() {
     const d = new Date();
@@ -316,119 +326,272 @@
   function predictId(slug, question) {
     return question === "today" ? `${slug}:today:${todayKey()}` : `${slug}:all`;
   }
-  function pct(yes, no) {
-    const t = (yes || 0) + (no || 0);
-    return t === 0 ? null : Math.round((yes / t) * 100);
-  }
-  async function fetchTally(id) {
-    if (!PREDICT_WORKER_URL) return null;
-    try {
-      const r = await fetch(`${PREDICT_WORKER_URL}?id=${encodeURIComponent(id)}`);
-      if (!r.ok) return null;
-      return await r.json();
-    } catch (e) { return null; }
-  }
-  async function castVote(id, vote) {
-    if (!PREDICT_WORKER_URL) return null;
-    try {
-      const r = await fetch(`${PREDICT_WORKER_URL}?id=${encodeURIComponent(id)}&vote=${vote}`, { method: "POST" });
-      if (!r.ok) return null;
-      return await r.json();
-    } catch (e) { return null; }
+  function questionLabel(q) {
+    return q === "today" ? "Will she find it today?" : "Will she find it at all?";
   }
 
-  function renderQuestionBlock(slug, question, label) {
+  function getWallet() {
+    try {
+      const raw = localStorage.getItem("wallet");
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    const fresh = { balance: STARTING_BALANCE, positions: {} };
+    localStorage.setItem("wallet", JSON.stringify(fresh));
+    return fresh;
+  }
+  function saveWallet(w) { localStorage.setItem("wallet", JSON.stringify(w)); }
+
+  function priceYes(market) {
+    const t = (market.yes || 0) + (market.no || 0);
+    return t === 0 ? 0.5 : market.yes / t;
+  }
+  function positionValue(pos, market) {
+    if (!pos) return 0;
+    if (market.status === "resolved") {
+      return market.outcome === "yes" ? (pos.yes || 0) : (pos.no || 0);
+    }
+    const pY = priceYes(market);
+    return (pos.yes || 0) * pY + (pos.no || 0) * (1 - pY);
+  }
+  function fmtMoney(v) {
+    return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function fmtShares(n) {
+    return n < 10 ? n.toFixed(1) : n.toFixed(0);
+  }
+
+  const marketsCache = {};
+  const stakeChoice = {};  // marketId → chosen stake
+  let allMarketIds = [];
+
+  async function fetchMarkets(ids) {
+    if (!PREDICT_WORKER_URL || !ids.length) return {};
+    try {
+      const r = await fetch(`${PREDICT_WORKER_URL}/?ids=${encodeURIComponent(ids.join(","))}`);
+      if (!r.ok) return {};
+      return await r.json();
+    } catch (e) { return {}; }
+  }
+  async function buyShares(marketId, side, shares) {
+    const r = await fetch(`${PREDICT_WORKER_URL}/buy?market=${encodeURIComponent(marketId)}&side=${side}&shares=${shares}`, { method: "POST" });
+    if (!r.ok) throw new Error((await r.json()).error || "buy failed");
+    return await r.json();
+  }
+  async function resolveMarket(marketId, outcome) {
+    if (!adminToken) throw new Error("no admin token");
+    const r = await fetch(`${PREDICT_WORKER_URL}/resolve?market=${encodeURIComponent(marketId)}&outcome=${outcome}&secret=${encodeURIComponent(adminToken)}`, { method: "POST" });
+    if (!r.ok) throw new Error((await r.json()).error || "resolve failed");
+    return await r.json();
+  }
+
+  // Auto-settle: when a held position belongs to a resolved market, credit balance and clear
+  function settleResolved(wallet) {
+    let changed = false;
+    Object.keys(wallet.positions).forEach(id => {
+      const m = marketsCache[id];
+      if (!m || m.status !== "resolved") return;
+      const pos = wallet.positions[id];
+      const payout = m.outcome === "yes" ? (pos.yes || 0) : (pos.no || 0);
+      wallet.balance += payout;
+      delete wallet.positions[id];
+      changed = true;
+    });
+    if (changed) saveWallet(wallet);
+  }
+
+  let predictRendered = false;
+
+  async function renderPredictDashboard() {
+    const items = coveted.filter(c => c.status !== "bought");
+    allMarketIds = [];
+    items.forEach(c => {
+      const slug = itemSlug(c);
+      allMarketIds.push(predictId(slug, "all"));
+      allMarketIds.push(predictId(slug, "today"));
+    });
+
+    Object.assign(marketsCache, await fetchMarkets(allMarketIds));
+    settleResolved(getWallet());
+
+    predictContent.innerHTML = `
+      <div class="port" id="port"></div>
+      ${PREDICT_WORKER_URL ? "" : `<div class="predict-notice">Backend offline — set <code>PREDICT_WORKER_URL</code> in app.js.</div>`}
+      <div class="markets" id="markets">${items.map(renderItemBlock).join("")}</div>
+    `;
+
+    renderPortfolio();
+    predictContent.addEventListener("click", onDashboardClick);
+    predictRendered = true;
+  }
+
+  function renderItemBlock(c) {
+    const slug = itemSlug(c);
+    const imgTag = c.img
+      ? `<img class="predict-thumb" loading="lazy" src="${escapeAttr(c.img)}" alt="" onerror="this.style.visibility='hidden'">`
+      : `<div class="predict-thumb"></div>`;
     return `
-      <div class="predict-q" data-q="${question}">
-        <div class="predict-q-label">${escapeHtml(label)}</div>
-        <div class="predict-q-bar"><div class="predict-q-fill" style="width:0%"></div></div>
-        <div class="predict-q-row">
-          <span class="predict-q-pct">—</span>
-          <span class="predict-q-counts">0 yes · 0 no</span>
-          <div class="predict-q-btns">
-            <button class="predict-vote" data-slug="${escapeAttr(slug)}" data-q="${question}" data-vote="yes"${PREDICT_WORKER_URL ? "" : " disabled"}>Yes</button>
-            <button class="predict-vote" data-slug="${escapeAttr(slug)}" data-q="${question}" data-vote="no"${PREDICT_WORKER_URL ? "" : " disabled"}>No</button>
+      <article class="predict-row" data-slug="${escapeAttr(slug)}">
+        <header class="predict-row-head">
+          ${imgTag}
+          <div>
+            <div class="predict-brand">${escapeHtml(c.brand || "—")}</div>
+            <div class="predict-name">${escapeHtml(c.name)}</div>
           </div>
+        </header>
+        ${renderMarket(slug, "all")}
+        ${renderMarket(slug, "today")}
+      </article>
+    `;
+  }
+
+  function renderMarket(slug, q) {
+    const id = predictId(slug, q);
+    const m = marketsCache[id] || { yes: 0, no: 0, status: "open", outcome: null };
+    const wallet = getWallet();
+    const pos = wallet.positions[id] || { yes: 0, no: 0 };
+    const pY = priceYes(m);
+    const pYesPct = Math.round(pY * 100);
+    const totalShares = (m.yes || 0) + (m.no || 0);
+    const isResolved = m.status === "resolved";
+    const stake = stakeChoice[id] || STAKE_PRESETS[0];
+
+    const resolveCtrl = (!isResolved && adminToken && PREDICT_WORKER_URL)
+      ? `<div class="market-admin"><button class="resolve-btn" data-side="yes" data-market="${escapeAttr(id)}">Resolve YES</button><button class="resolve-btn" data-side="no" data-market="${escapeAttr(id)}">Resolve NO</button></div>`
+      : "";
+
+    const statusBadge = isResolved
+      ? `<span class="market-badge market-badge-${m.outcome}">Resolved ${m.outcome.toUpperCase()}</span>`
+      : "";
+
+    const posLine = (pos.yes > 0 || pos.no > 0)
+      ? `You hold ${fmtShares(pos.yes || 0)} YES · ${fmtShares(pos.no || 0)} NO`
+      : "";
+
+    const betUI = isResolved || !PREDICT_WORKER_URL ? "" : `
+      <div class="bet">
+        <div class="bet-chips">
+          ${STAKE_PRESETS.map(a => `<button class="bet-chip${a === stake ? " is-on" : ""}" data-stake="${a}" data-market="${escapeAttr(id)}">$${a}</button>`).join("")}
         </div>
+        <div class="bet-btns">
+          <button class="bet-yes" data-side="yes" data-market="${escapeAttr(id)}">Buy YES <span class="bet-price">${fmtMoney(pY)}</span></button>
+          <button class="bet-no" data-side="no" data-market="${escapeAttr(id)}">Buy NO <span class="bet-price">${fmtMoney(1 - pY)}</span></button>
+        </div>
+      </div>
+    `;
+
+    return `
+      <div class="market" data-market="${escapeAttr(id)}" data-slug="${escapeAttr(slug)}" data-q="${q}">
+        <div class="market-head">
+          <span class="market-label">${escapeHtml(questionLabel(q))}</span>
+          ${statusBadge}
+        </div>
+        <div class="market-bar"><div class="market-fill" style="width:${pYesPct}%"></div></div>
+        <div class="market-meta">
+          <span class="market-pct">${pYesPct}%</span>
+          <span class="market-vol">${fmtShares(totalShares)} shares traded</span>
+        </div>
+        ${posLine ? `<div class="market-pos">${posLine}</div>` : ""}
+        ${betUI}
+        ${resolveCtrl}
       </div>
     `;
   }
 
-  function updateQuestionRow(slug, question, tally) {
-    const row = predictContent.querySelector(`.predict-row[data-slug="${slug}"] .predict-q[data-q="${question}"]`);
-    if (!row) return;
-    const yes = (tally && tally.yes) || 0;
-    const no = (tally && tally.no) || 0;
-    const p = pct(yes, no);
-    row.querySelector(".predict-q-fill").style.width = (p == null ? 0 : p) + "%";
-    row.querySelector(".predict-q-pct").textContent = (p == null ? "—" : p + "%");
-    row.querySelector(".predict-q-counts").textContent = `${yes} yes · ${no} no`;
-    const id = predictId(slug, question);
-    const voted = localStorage.getItem(`vote-${id}`);
-    if (voted) markVoted(slug, question, voted);
+  function renderPortfolio() {
+    const wallet = getWallet();
+    let positionsValue = 0;
+    Object.keys(wallet.positions).forEach(id => {
+      const m = marketsCache[id];
+      if (m) positionsValue += positionValue(wallet.positions[id], m);
+    });
+    const total = wallet.balance + positionsValue;
+    const profit = total - STARTING_BALANCE;
+    const profitSign = profit >= 0 ? "+" : "−";
+    const profitPct = ((profit / STARTING_BALANCE) * 100);
+    const profitColorClass = profit >= 0 ? "is-up" : "is-down";
+
+    const el = document.getElementById("port");
+    if (!el) return;
+    el.innerHTML = `
+      <div class="port-line">
+        <div class="port-balance">${fmtMoney(total)}</div>
+        <div class="port-net ${profitColorClass}">${profitSign}${fmtMoney(Math.abs(profit))} <span class="port-pct">${profitSign}${Math.abs(profitPct).toFixed(1)}%</span></div>
+      </div>
+      <div class="port-sub">Cash ${fmtMoney(wallet.balance)} · Positions ${fmtMoney(positionsValue)}</div>
+    `;
   }
 
-  function markVoted(slug, question, vote) {
-    const row = predictContent.querySelector(`.predict-row[data-slug="${slug}"] .predict-q[data-q="${question}"]`);
-    if (!row) return;
-    row.querySelectorAll(".predict-vote").forEach(b => {
-      b.classList.toggle("voted", b.dataset.vote === vote);
-      b.disabled = true;
-    });
+  function rerenderMarket(marketId) {
+    const el = predictContent.querySelector(`.market[data-market="${marketId}"]`);
+    if (!el) return;
+    const slug = el.dataset.slug;
+    const q = el.dataset.q;
+    const tmp = document.createElement("div");
+    tmp.innerHTML = renderMarket(slug, q).trim();
+    el.replaceWith(tmp.firstChild);
   }
 
-  function renderPredictDashboard() {
-    if (predictRendered) return;
-    predictRendered = true;
-    const items = coveted.filter(c => c.status !== "bought");
-    const notice = PREDICT_WORKER_URL ? "" : `<div class="predict-notice">Voting is offline — set <code>PREDICT_WORKER_URL</code> in <code>app.js</code> to enable.</div>`;
-    const rows = items.map(c => {
-      const slug = itemSlug(c);
-      const imgTag = c.img
-        ? `<img class="predict-thumb" loading="lazy" src="${escapeAttr(c.img)}" alt="" onerror="this.style.visibility='hidden'">`
-        : `<div class="predict-thumb"></div>`;
-      return `
-        <div class="predict-row" data-slug="${escapeAttr(slug)}">
-          <div class="predict-row-head">
-            ${imgTag}
-            <div>
-              <div class="predict-name">${escapeHtml(c.name)}</div>
-              <div class="predict-brand">${escapeHtml(c.brand || "—")}</div>
-            </div>
-          </div>
-          ${renderQuestionBlock(slug, "all", "Will she find it at all?")}
-          ${renderQuestionBlock(slug, "today", "Will she find it today?")}
-        </div>
-      `;
-    }).join("");
-    predictContent.innerHTML = notice + rows;
+  async function onDashboardClick(ev) {
+    const chip = ev.target.closest(".bet-chip");
+    if (chip) {
+      const id = chip.dataset.market;
+      stakeChoice[id] = parseFloat(chip.dataset.stake);
+      rerenderMarket(id);
+      return;
+    }
+    const buy = ev.target.closest(".bet-yes, .bet-no");
+    if (buy) {
+      const id = buy.dataset.market;
+      const side = buy.dataset.side;
+      const stake = stakeChoice[id] || STAKE_PRESETS[0];
+      await handleBuy(id, side, stake);
+      return;
+    }
+    const resolve = ev.target.closest(".resolve-btn");
+    if (resolve) {
+      const id = resolve.dataset.market;
+      const outcome = resolve.dataset.side;
+      if (!confirm(`Resolve "${id}" as ${outcome.toUpperCase()}?`)) return;
+      await handleResolve(id, outcome);
+      return;
+    }
+  }
 
-    items.forEach(c => {
-      const slug = itemSlug(c);
-      ["all", "today"].forEach(async q => {
-        const tally = await fetchTally(predictId(slug, q));
-        updateQuestionRow(slug, q, tally);
-      });
-    });
+  async function handleBuy(marketId, side, dollars) {
+    const wallet = getWallet();
+    if (wallet.balance < dollars) { alert("Not enough balance"); return; }
+    const m = marketsCache[marketId];
+    if (!m) { alert("Market not loaded"); return; }
+    const price = side === "yes" ? priceYes(m) : (1 - priceYes(m));
+    if (price <= 0.01 || price >= 0.99) { alert("Price too extreme — try a smaller stake or the other side"); return; }
+    const shares = dollars / price;
 
-    predictContent.querySelectorAll(".predict-vote").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const slug = btn.dataset.slug;
-        const q = btn.dataset.q;
-        const vote = btn.dataset.vote;
-        const id = predictId(slug, q);
-        const lsKey = `vote-${id}`;
-        if (localStorage.getItem(lsKey)) return;
-        markVoted(slug, q, vote);
-        localStorage.setItem(lsKey, vote);
-        const tally = await castVote(id, vote);
-        if (tally) updateQuestionRow(slug, q, tally);
-      });
-    });
+    let updated;
+    try { updated = await buyShares(marketId, side, shares); }
+    catch (e) { alert("Buy failed: " + e.message); return; }
+
+    marketsCache[marketId] = updated;
+    wallet.balance -= dollars;
+    if (!wallet.positions[marketId]) wallet.positions[marketId] = { yes: 0, no: 0 };
+    wallet.positions[marketId][side] = (wallet.positions[marketId][side] || 0) + shares;
+    saveWallet(wallet);
+
+    rerenderMarket(marketId);
+    renderPortfolio();
+  }
+
+  async function handleResolve(marketId, outcome) {
+    let updated;
+    try { updated = await resolveMarket(marketId, outcome); }
+    catch (e) { alert("Resolve failed: " + e.message); return; }
+    marketsCache[marketId] = updated;
+    settleResolved(getWallet());
+    rerenderMarket(marketId);
+    renderPortfolio();
   }
 
   function openPredictSheet() {
-    renderPredictDashboard();
+    if (!predictRendered) renderPredictDashboard();
     predictBackdrop.hidden = false;
     requestAnimationFrame(() => {
       predictBackdrop.classList.add("is-open");
