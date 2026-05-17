@@ -111,6 +111,14 @@ window.TRIP = {
       location: "Osaka",
       src: "photos/osaka-drugstore.png",
       shop: { name: "Drug Store", minutes: 20 }
+    },
+    {
+      id: "013",
+      date: "2026-05-20",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/beams-osaka.jpg",
+      shop: { name: "BEAMS", minutes: 30 }
     }
   ]
 };
