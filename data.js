@@ -56,6 +56,7 @@ window.TRIP = {
       city: "osaka",
       location: "Amerikamura, Osaka",
       src: "photos/ragtag-osaka.svg",
+      gallery: ["photos/ragtag-osaka-2.svg", "photos/ragtag-osaka-3.svg"],
       ratio: "tall",
       shop: { name: "RAGTAG", minutes: 35, eyed: 14, bought: 1 }
     },
@@ -74,6 +75,7 @@ window.TRIP = {
       city: "osaka",
       location: "Shinsaibashi, Osaka",
       src: "photos/komehyo-osaka.svg",
+      gallery: ["photos/komehyo-osaka-2.svg", "photos/komehyo-osaka-3.svg"],
       ratio: "tall",
       shop: { name: "Komehyo", minutes: 50, eyed: 22, bought: 3 }
     },

@@ -27,17 +27,7 @@
   <div id="coveted-grid" class="coveted-grid"></div>
 </section>
 
-<section class="section field-notes" aria-label="Field notes">
-  <h2 class="section-head">Japan / Field Notes</h2>
-  <nav class="chips" aria-label="Filter">
-    <button class="chip is-on" data-filter="all">All</button>
-    <button class="chip" data-filter="tokyo">Tokyo</button>
-    <button class="chip" data-filter="kyoto">Kyoto</button>
-    <button class="chip" data-filter="osaka">Osaka</button>
-    <button class="chip" data-filter="shop">Wife's shops</button>
-  </nav>
-  <main id="feed" class="feed"></main>
-</section>
+<main id="city-sections" aria-label="Field notes by city"></main>
 
 <div id="map-backdrop" class="map-backdrop" hidden></div>
 <aside id="map-sheet" class="map-sheet" aria-hidden="true" aria-label="Trip map">
@@ -48,16 +38,6 @@
   </div>
   <div id="leaflet-map" class="leaflet-map"></div>
 </aside>
-
-<div id="lightbox" class="lightbox" hidden>
-  <button class="lb-close" aria-label="Close">&times;</button>
-  <figure class="lb-figure">
-    <div class="lb-imgwrap"><img id="lb-img" alt=""></div>
-    <figcaption id="lb-cap"></figcaption>
-  </figure>
-  <button class="lb-prev" aria-label="Previous">&larr;</button>
-  <button class="lb-next" aria-label="Next">&rarr;</button>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="data.js"></script>
