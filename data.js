@@ -34,7 +34,8 @@ window.TRIP = {
       city: "osaka",
       location: "Osaka",
       src: "photos/osaka-drugstore.jpg",
-      shop: { name: "Drug Store", minutes: 20 }
+      body: "Went in for allergy medicine and came out with $40 of cosmetics and candy.",
+      shop: { name: "Drug Store", minutes: 25 }
     },
     {
       id: "museum",
