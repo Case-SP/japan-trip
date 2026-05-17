@@ -11,7 +11,10 @@
 <body>
 
 <header class="brand-bar">
-  <span class="brand-mark">Field Journal</span>
+  <div class="brand-row-title">
+    <h1 class="brand-mark">Justine&rsquo;s HoneyMoon <span class="brand-aka">[AKA Shopping Trip]</span></h1>
+    <button class="brand-dot" id="map-trigger" aria-label="Open map" aria-controls="map-sheet" aria-expanded="false"></button>
+  </div>
   <div class="brand-ledger" aria-label="Ledger: minutes waiting, items eyed, items bought" title="Minutes · Eyed · Bought">
     <span id="stat-min">0</span>
     <span class="brand-sep">·</span>
@@ -19,7 +22,6 @@
     <span class="brand-sep">·</span>
     <span id="stat-bought">0</span>
   </div>
-  <button class="brand-dot" id="map-trigger" aria-label="Open map" aria-controls="map-sheet" aria-expanded="false"></button>
 </header>
 
 <section class="section coveted" aria-label="Coveted objects">

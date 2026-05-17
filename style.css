@@ -36,19 +36,29 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   top: 0;
   z-index: 20;
   background: var(--paper);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   padding: 14px 20px;
   padding-top: calc(14px + env(safe-area-inset-top));
 }
-.brand-mark {
-  font-size: 16px;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--ink-muted);
+.brand-row-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
+.brand-mark {
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.brand-aka { white-space: nowrap; }
 .brand-ledger {
   font-size: 16px;
   line-height: 1.2;
@@ -89,7 +99,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .section + .section { padding-top: 64px; }
 body { padding-bottom: 80px; }
 .section-head {
-  font-size: 18px;
+  font-size: 24px;
   line-height: 1.1;
   letter-spacing: -0.04em;
   font-weight: 400;
