@@ -391,7 +391,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* ── Wider screens ────────────────────────────────────── */
 @media (min-width: 720px) {
   body { font-size: 18px; }
-  .brand-bar, .masthead, .map-section, .section, .colophon {
+  .brand-bar, .masthead, .section, .colophon {
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
@@ -400,5 +400,4 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   .section-head { font-size: 56px; }
   .stat .num { font-size: 64px; }
   .coveted-grid { grid-template-columns: repeat(4, 1fr); gap: 36px 18px; }
-  .map-section svg { max-width: 280px; }
 }
