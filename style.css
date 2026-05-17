@@ -229,15 +229,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .wait strong { color: var(--ink); font-weight: 500; }
 
-/* ── Colophon ─────────────────────────────────────────── */
-.colophon {
-  padding: 24px 24px 80px;
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--ink-muted);
-}
-.colophon p { margin: 0 0 2px; }
-
 /* ── Map sheet (half-sheet drawer) ────────────────────── */
 .map-backdrop {
   position: fixed; inset: 0;
@@ -366,7 +357,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* ── Wider screens ────────────────────────────────────── */
 @media (min-width: 720px) {
-  .brand-bar, .section, .colophon {
+  .brand-bar, .section {
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
