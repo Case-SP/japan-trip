@@ -119,7 +119,7 @@ body { padding-bottom: 80px; }
 .cov-card > img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   background: var(--paper-deep);
 }
@@ -191,9 +191,10 @@ body { padding-bottom: 80px; }
 .card-img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   opacity: 0;
   transition: opacity 300ms ease;
+  background: var(--paper-deep);
 }
 .card-img.is-on { opacity: 1; }
 .card-placeholder { position: absolute; inset: 0; background: var(--paper-deep); }

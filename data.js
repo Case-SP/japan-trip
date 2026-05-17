@@ -95,6 +95,22 @@ window.TRIP = {
       src: "photos/2ndstreet-osaka.svg",
       ratio: "tall",
       shop: { name: "2nd STREET", minutes: 18, eyed: 7, bought: 0 }
+    },
+    {
+      id: "011",
+      date: "2026-05-20",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/head-spa-osaka.heic",
+      shop: { name: "Head Spa", minutes: 150 }
+    },
+    {
+      id: "012",
+      date: "2026-05-20",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/osaka-drugstore.png",
+      shop: { name: "Drug Store", minutes: 20 }
     }
   ]
 };
