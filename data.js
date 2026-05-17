@@ -49,6 +49,15 @@ window.TRIP = {
       location: "Dotonbori, Osaka",
       caption: "Takoyaki, twice. No regrets.",
       ratio: "square"
+    },
+    {
+      id: "009",
+      date: "2026-05-19",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/allu-osaka.jpg",
+      ratio: "tall",
+      shop: { name: "ALLU", minutes: 20, eyed: 0, bought: 0 }
     }
   ]
 };
