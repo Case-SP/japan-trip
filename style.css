@@ -271,7 +271,7 @@ body { padding-bottom: 80px; }
   letter-spacing: -0.02em;
   color: var(--ink-muted);
   margin: 0;
-  max-width: 60ch;
+  max-width: 50%;
 }
 .entry-place {
   font-size: 14px;
