@@ -1,288 +1,189 @@
 (function () {
-  const entries = window.ENTRIES || [];
-  const coords = window.CITY_COORDS || {};
-  const SVG_NS = "http://www.w3.org/2000/svg";
+  const data = (window.TRIP && window.TRIP.entries) || [];
+  const feed = document.getElementById("feed");
+  const datesEl = document.getElementById("trip-dates");
+  if (window.TRIP && window.TRIP.dates) datesEl.textContent = window.TRIP.dates;
 
-  let currentFilter = "all"; // "all" | "wife" | <cityName>
-  let lightboxList = [];
-  let lightboxIndex = 0;
-  let touchStartX = null;
-  let touchStartY = null;
+  const CITY_COORDS = {
+    sapporo:   { x: 142, y: 52,  lx: 152, ly: 56,  anchor: "start" },
+    hakodate:  { x: 128, y: 76,  lx: 138, ly: 80,  anchor: "start" },
+    sendai:    { x: 178, y: 142, lx: 188, ly: 145, anchor: "end" },
+    tokyo:     { x: 176, y: 196, lx: 188, ly: 199, anchor: "end" },
+    kanazawa:  { x: 118, y: 168, lx: 108, ly: 165, anchor: "end" },
+    nagoya:    { x: 152, y: 195, lx: 158, ly: 207, anchor: "start" },
+    kyoto:     { x: 135, y: 184, lx: 122, ly: 180, anchor: "end" },
+    osaka:     { x: 128, y: 197, lx: 118, ly: 202, anchor: "end" },
+    nara:      { x: 138, y: 202, lx: 148, ly: 213, anchor: "start" },
+    hiroshima: { x: 105, y: 212, lx: 95,  ly: 215, anchor: "end" },
+    fukuoka:   { x: 78,  y: 272, lx: 68,  ly: 275, anchor: "end" }
+  };
 
-  const $ = (s) => document.querySelector(s);
+  const totalMin = data.reduce((s, e) => s + ((e.shop && e.shop.minutes) || 0), 0);
+  const totalEyed = data.reduce((s, e) => s + ((e.shop && e.shop.eyed) || 0), 0);
+  const totalBought = data.reduce((s, e) => s + ((e.shop && e.shop.bought) || 0), 0);
+  document.getElementById("stat-min").textContent = totalMin;
+  document.getElementById("stat-eyed").textContent = totalEyed;
+  document.getElementById("stat-bought").textContent = totalBought;
 
-  const escapeHTML = (s) =>
-    String(s).replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
-    );
+  const citiesG = document.getElementById("map-cities");
+  const routeG = document.getElementById("map-route");
+  const NS = "http://www.w3.org/2000/svg";
+  const visitedCities = [];
+  const seen = new Set();
+  [...data].sort((a, b) => (a.date || "").localeCompare(b.date || ""))
+    .forEach(e => { if (e.city && !seen.has(e.city)) { seen.add(e.city); visitedCities.push(e.city); } });
 
-  function fmtDate(s) {
-    const d = new Date(s + "T00:00:00");
-    return d
-      .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      .toLowerCase();
+  const routePts = visitedCities.map(c => CITY_COORDS[c]).filter(Boolean)
+    .map(c => `${c.x},${c.y}`).join(" ");
+  if (routePts) {
+    const line = document.createElementNS(NS, "polyline");
+    line.setAttribute("points", routePts);
+    routeG.appendChild(line);
   }
 
-  function uniqueCitiesByVisit() {
-    const seen = new Set();
-    const out = [];
-    [...entries]
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .forEach((e) => {
-        if (!seen.has(e.city)) {
-          seen.add(e.city);
-          out.push(e.city);
-        }
-      });
-    return out;
-  }
+  visitedCities.forEach(city => {
+    const c = CITY_COORDS[city];
+    if (!c) return;
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "city");
+    g.setAttribute("data-city", city);
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    g.setAttribute("aria-label", "Filter to " + city);
+    const dot = document.createElementNS(NS, "circle");
+    dot.setAttribute("cx", c.x); dot.setAttribute("cy", c.y); dot.setAttribute("r", 2.6);
+    const ring = document.createElementNS(NS, "circle");
+    ring.setAttribute("class", "ring");
+    ring.setAttribute("cx", c.x); ring.setAttribute("cy", c.y); ring.setAttribute("r", 5.5);
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("x", c.lx); t.setAttribute("y", c.ly);
+    t.setAttribute("text-anchor", c.anchor);
+    t.textContent = city.charAt(0).toUpperCase() + city.slice(1);
+    g.appendChild(ring); g.appendChild(dot); g.appendChild(t);
+    g.addEventListener("click", () => applyFilter(city));
+    g.addEventListener("keypress", ev => { if (ev.key === "Enter") applyFilter(city); });
+    citiesG.appendChild(g);
+  });
 
-  function filteredEntries() {
-    const list = [...entries].sort((a, b) => a.date.localeCompare(b.date));
-    if (currentFilter === "all") return list;
-    if (currentFilter === "wife") return list.filter((e) => e.shop);
-    return list.filter((e) => e.city === currentFilter);
-  }
+  const fmtDate = iso => {
+    const d = new Date(iso + "T00:00:00");
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
 
-  function renderMetrics() {
-    let mins = 0, eyed = 0, bought = 0;
-    entries.forEach((e) => {
-      if (e.shop) {
-        mins += e.shop.minutes || 0;
-        eyed += e.shop.eyed || 0;
-        bought += e.shop.bought || 0;
-      }
-    });
-    $("#metric-mins").textContent = mins;
-    $("#metric-eyed").textContent = eyed;
-    $("#metric-bought").textContent = bought;
-  }
-
-  function renderChips() {
-    const cities = uniqueCitiesByVisit();
-    const wrap = $("#chips");
-    wrap.innerHTML = "";
-    const make = (key, label, cls = "") => {
-      const b = document.createElement("button");
-      b.className =
-        "chip " + cls + (currentFilter === key ? " is-active" : "");
-      b.textContent = label;
-      b.addEventListener("click", () => {
-        currentFilter = key;
-        renderAll();
-      });
-      return b;
-    };
-    wrap.appendChild(make("all", "all"));
-    cities.forEach((c) => wrap.appendChild(make(c, c)));
-    wrap.appendChild(make("wife", "wife's shops", "wife"));
-  }
-
-  function renderMap() {
-    const svg = $("#map-svg");
-    svg.querySelectorAll(".dyn").forEach((n) => n.remove());
-
-    const cities = uniqueCitiesByVisit().filter((c) => coords[c]);
-
-    if (cities.length > 1) {
-      const pts = cities.map((c) => `${coords[c].x},${coords[c].y}`).join(" ");
-      const route = document.createElementNS(SVG_NS, "polyline");
-      route.setAttribute("points", pts);
-      route.setAttribute("class", "map-route dyn");
-      svg.appendChild(route);
+  data.forEach((e, i) => {
+    const entry = document.createElement("article");
+    entry.className = "entry";
+    entry.dataset.city = e.city || "";
+    entry.dataset.shop = e.shop ? "1" : "0";
+    entry.dataset.index = String(i);
+    const ratio = e.ratio ? ` ${e.ratio}` : "";
+    const num = String(i + 1).padStart(2, "0");
+    const photoHtml = e.src
+      ? `<div class="photo${ratio}" data-index="${i}"><img loading="lazy" src="${e.src}" alt="${escapeAttr(e.caption || e.location)}"></div>`
+      : `<div class="photo${ratio}"><div class="placeholder">${escapeHtml(e.location || "Add photo")}</div></div>`;
+    let ledger = "";
+    if (e.shop) {
+      const bits = [];
+      if (e.shop.minutes != null) bits.push(`<strong>${e.shop.minutes} min</strong>`);
+      if (e.shop.eyed != null) bits.push(`${e.shop.eyed} eyed`);
+      if (e.shop.bought != null) bits.push(`${e.shop.bought} bought`);
+      ledger = `<p class="wait">${escapeHtml(e.shop.name || "Shop")} &mdash; ${bits.join(" &middot; ")}</p>`;
     }
+    entry.innerHTML = `
+      <div class="entry-head">
+        <span class="entry-num">${num}</span>
+        <span class="entry-loc">${escapeHtml(e.location || "")}</span>
+      </div>
+      ${photoHtml}
+      ${e.caption ? `<p class="entry-cap">${escapeHtml(e.caption)}</p>` : ""}
+      <div class="entry-meta">
+        <span class="date">${fmtDate(e.date)}</span>
+        ${e.shop ? `<span>Wife&rsquo;s shop</span>` : ""}
+      </div>
+      ${ledger}
+    `;
+    feed.appendChild(entry);
+  });
 
-    cities.forEach((c) => {
-      const { x, y } = coords[c];
-      const isActive = currentFilter === c;
-
-      const dot = document.createElementNS(SVG_NS, "circle");
-      dot.setAttribute("cx", x);
-      dot.setAttribute("cy", y);
-      dot.setAttribute("r", isActive ? 4.8 : 4);
-      dot.setAttribute("class", "map-dot dyn" + (isActive ? " is-active" : ""));
-      svg.appendChild(dot);
-
-      const lbl = document.createElementNS(SVG_NS, "text");
-      lbl.setAttribute("x", x + 6);
-      lbl.setAttribute("y", y + 2.5);
-      lbl.setAttribute("class", "map-label dyn");
-      lbl.textContent = c;
-      svg.appendChild(lbl);
-
-      const hit = document.createElementNS(SVG_NS, "circle");
-      hit.setAttribute("cx", x);
-      hit.setAttribute("cy", y);
-      hit.setAttribute("r", 12);
-      hit.setAttribute("class", "map-dot-hit dyn");
-      hit.addEventListener("click", () => {
-        currentFilter = currentFilter === c ? "all" : c;
-        renderAll();
-      });
-      svg.appendChild(hit);
+  const chips = document.querySelectorAll(".chip");
+  function applyFilter(f) {
+    chips.forEach(c => c.classList.toggle("is-on", c.dataset.filter === f));
+    document.querySelectorAll(".entry").forEach(el => {
+      if (f === "all") el.classList.remove("hidden");
+      else if (f === "shop") el.classList.toggle("hidden", el.dataset.shop !== "1");
+      else el.classList.toggle("hidden", el.dataset.city !== f);
     });
-  }
-
-  function renderFeed() {
-    const feed = $("#feed");
-    feed.innerHTML = "";
-    const list = filteredEntries();
-
-    if (list.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = "no entries";
-      feed.appendChild(empty);
-      return;
-    }
-
-    const photoList = list.filter((e) => e.src);
-    const photoIndex = new Map();
-    photoList.forEach((e, i) => photoIndex.set(e.id, i));
-
-    list.forEach((e, i) => {
-      const article = document.createElement("article");
-      article.className = "entry";
-
-      const head = document.createElement("div");
-      head.className = "entry-head";
-
-      const no = document.createElement("span");
-      no.className = "entry-no";
-      no.textContent = "no. " + String(i + 1).padStart(2, "0");
-
-      const meta = document.createElement("span");
-      meta.className = "entry-meta";
-      meta.textContent = `${fmtDate(e.date)} · ${e.city}`;
-
-      head.appendChild(no);
-      head.appendChild(meta);
-      article.appendChild(head);
-
-      const loc = document.createElement("p");
-      loc.className = "entry-loc";
-      loc.textContent = e.location;
-      article.appendChild(loc);
-
-      if (e.src) {
-        const btn = document.createElement("button");
-        btn.className = "entry-photo";
-        btn.type = "button";
-        const img = document.createElement("img");
-        img.src = e.src;
-        img.alt = e.caption || e.location;
-        img.loading = "lazy";
-        if (e.ratio) img.style.aspectRatio = String(e.ratio);
-        btn.appendChild(img);
-        btn.addEventListener("click", () =>
-          openLightbox(photoList, photoIndex.get(e.id))
-        );
-        article.appendChild(btn);
-      } else {
-        const ph = document.createElement("div");
-        ph.className = "entry-placeholder";
-        ph.style.aspectRatio = String(e.ratio || 4 / 5);
-        ph.textContent = "photo to come";
-        article.appendChild(ph);
-      }
-
-      if (e.caption) {
-        const cap = document.createElement("p");
-        cap.className = "entry-caption";
-        cap.textContent = e.caption;
-        article.appendChild(cap);
-      }
-
-      if (e.shop) {
-        const shop = document.createElement("div");
-        shop.className = "entry-shop";
-        shop.innerHTML =
-          `<span class="shop-name">${escapeHTML(e.shop.name)}</span>` +
-          `<span><em>${e.shop.minutes}</em> min waiting</span>` +
-          `<span><em>${e.shop.eyed}</em> eyed</span>` +
-          `<span><em>${e.shop.bought}</em> bought</span>`;
-        article.appendChild(shop);
-      }
-
-      feed.appendChild(article);
+    document.querySelectorAll("#map-cities .city").forEach(g => {
+      g.classList.toggle("is-on", g.dataset.city === f);
     });
+    window.scrollTo({ top: document.querySelector(".feed").offsetTop - 8, behavior: "smooth" });
   }
+  chips.forEach(c => c.addEventListener("click", () => applyFilter(c.dataset.filter)));
 
-  function openLightbox(list, index) {
-    if (!list.length) return;
-    lightboxList = list;
-    lightboxIndex = index;
-    renderLightbox();
-    const lb = $("#lightbox");
-    lb.classList.add("is-open");
-    lb.setAttribute("aria-hidden", "false");
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lb-img");
+  const lbCap = document.getElementById("lb-cap");
+  let visible = [];
+  let cur = 0;
+
+  function openLb(index) {
+    visible = Array.from(document.querySelectorAll(".entry:not(.hidden)"))
+      .map(el => data[Number(el.dataset.index)])
+      .filter(e => e && e.src);
+    if (!visible.length) return;
+    const startEntry = data[index];
+    cur = Math.max(0, visible.indexOf(startEntry));
+    showCur();
+    lb.hidden = false;
     document.body.style.overflow = "hidden";
   }
-
-  function closeLightbox() {
-    const lb = $("#lightbox");
-    lb.classList.remove("is-open");
-    lb.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  function stepLightbox(dir) {
-    if (!lightboxList.length) return;
-    const n = lightboxList.length;
-    lightboxIndex = (lightboxIndex + dir + n) % n;
-    renderLightbox();
-  }
-
-  function renderLightbox() {
-    const e = lightboxList[lightboxIndex];
+  function showCur() {
+    const e = visible[cur];
     if (!e) return;
-    $("#lb-img").src = e.src;
-    $("#lb-img").alt = e.caption || "";
-    $("#lb-caption").textContent = e.caption || "";
-    $("#lb-count").textContent = `${lightboxIndex + 1} / ${lightboxList.length}`;
+    lbImg.src = e.src;
+    lbImg.alt = e.caption || e.location || "";
+    lbCap.textContent = e.caption ? `${e.caption} — ${e.location}` : (e.location || "");
   }
+  function closeLb() { lb.hidden = true; document.body.style.overflow = ""; }
+  function next() { if (!visible.length) return; cur = (cur + 1) % visible.length; showCur(); }
+  function prev() { if (!visible.length) return; cur = (cur - 1 + visible.length) % visible.length; showCur(); }
 
-  function wireLightbox() {
-    const lb = $("#lightbox");
-    lb.addEventListener("click", () => closeLightbox());
-    $("#lb-img").addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      closeLightbox();
-    });
-
-    document.addEventListener("keydown", (ev) => {
-      if (!lb.classList.contains("is-open")) return;
-      if (ev.key === "Escape") closeLightbox();
-      else if (ev.key === "ArrowRight") stepLightbox(1);
-      else if (ev.key === "ArrowLeft") stepLightbox(-1);
-    });
-
-    lb.addEventListener("touchstart", (ev) => {
-      touchStartX = ev.touches[0].clientX;
-      touchStartY = ev.touches[0].clientY;
-    }, { passive: true });
-    lb.addEventListener("touchend", (ev) => {
-      if (touchStartX == null) return;
-      const dx = ev.changedTouches[0].clientX - touchStartX;
-      const dy = ev.changedTouches[0].clientY - touchStartY;
-      touchStartX = null;
-      touchStartY = null;
-      // Treat as a swipe only when horizontal motion clearly dominates.
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        stepLightbox(dx < 0 ? 1 : -1);
-      }
-    });
-  }
-
-  function renderAll() {
-    renderChips();
-    renderMap();
-    renderFeed();
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    renderMetrics();
-    renderAll();
-    wireLightbox();
+  feed.addEventListener("click", ev => {
+    const ph = ev.target.closest(".photo");
+    if (!ph || !ph.dataset.index) return;
+    openLb(Number(ph.dataset.index));
   });
+  lb.querySelector(".lb-close").addEventListener("click", closeLb);
+  lb.querySelector(".lb-prev").addEventListener("click", prev);
+  lb.querySelector(".lb-next").addEventListener("click", next);
+  document.addEventListener("keydown", ev => {
+    if (lb.hidden) return;
+    if (ev.key === "Escape") closeLb();
+    if (ev.key === "ArrowRight") next();
+    if (ev.key === "ArrowLeft") prev();
+  });
+
+  let tx = 0, ty = 0, tt = 0;
+  lb.addEventListener("touchstart", ev => {
+    const t = ev.changedTouches[0];
+    tx = t.clientX; ty = t.clientY; tt = Date.now();
+  }, { passive: true });
+  lb.addEventListener("touchend", ev => {
+    const t = ev.changedTouches[0];
+    const dx = t.clientX - tx, dy = t.clientY - ty, dt = Date.now() - tt;
+    if (dt > 600) return;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      dx < 0 ? next() : prev();
+    } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+      closeLb();
+    }
+  }, { passive: true });
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
 })();

@@ -2,47 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f3ecd9">
-<title>Japan &mdash; spring 2026</title>
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4efe6">
+<title>Japan — A Field Journal</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header class="masthead">
-  <span class="kicker">a travel log</span>
-  <h1>Japan</h1>
-  <div class="sub">spring 2026</div>
+  <div class="mast-row">
+    <span class="mark">M—T</span>
+    <span class="mast-meta" id="trip-dates">May 2026</span>
+  </div>
+  <h1 class="title">Japan<span class="period">.</span></h1>
+  <p class="subtitle"><em>A field journal &mdash; with shopping waits.</em></p>
 </header>
 
-<div class="map-wrap" aria-label="map of visited cities">
-  <svg id="map-svg" viewBox="0 0 280 340" role="img" aria-label="Hand-drawn outline of Japan">
-    <path class="map-island" d="M 188 24 Q 222 22 245 52 Q 258 82 240 102 Q 218 118 198 112 Q 180 105 178 88 Q 178 60 188 24 Z"/>
-    <path class="map-island" d="M 210 108 Q 222 132 218 158 Q 222 195 208 220 Q 198 242 178 254 Q 140 268 100 274 Q 65 278 48 270 Q 60 258 88 246 Q 118 232 138 215 Q 162 192 178 162 Q 192 132 210 108 Z"/>
-    <path class="map-island" d="M 62 258 Q 92 256 108 264 Q 100 282 78 285 Q 60 280 62 258 Z"/>
-    <path class="map-island" d="M 55 262 Q 32 268 28 285 Q 25 305 35 322 Q 50 332 60 320 Q 70 300 62 280 Q 60 268 55 262 Z"/>
+<section class="map" aria-label="Map of Japan">
+  <svg id="jp-map" viewBox="0 0 200 320" role="img" aria-label="Japan, with visited cities">
+    <g class="land">
+      <path d="M 120 30 C 142 22 168 33 170 55 C 170 75 148 82 130 76 C 112 70 104 45 120 30 Z"/>
+      <path d="M 92 102 C 88 118 96 134 110 144 L 142 162 C 156 170 170 178 180 184 C 192 192 195 207 184 213 C 170 220 154 222 138 218 C 122 213 108 198 100 178 C 92 158 86 138 88 118 C 88 110 88 105 92 102 Z"/>
+      <path d="M 130 235 C 146 230 156 240 152 252 C 146 262 130 260 124 250 C 120 242 122 237 130 235 Z"/>
+      <path d="M 72 248 C 90 240 105 254 104 274 C 102 292 84 297 70 290 C 56 280 56 256 72 248 Z"/>
+    </g>
+    <g class="route" id="map-route"></g>
+    <g class="cities" id="map-cities"></g>
   </svg>
-  <div class="map-caption"><em>tap a dot to filter the feed</em></div>
-</div>
-
-<section class="metrics" aria-label="trip totals">
-  <div class="metric"><div class="num" id="metric-mins">0</div><span class="lbl">minutes<br>waiting</span></div>
-  <div class="metric"><div class="num" id="metric-eyed">0</div><span class="lbl">items<br>eyed</span></div>
-  <div class="metric"><div class="num" id="metric-bought">0</div><span class="lbl">items<br>bought</span></div>
+  <p class="map-note">Tap a city to filter</p>
 </section>
 
-<nav id="chips" class="chips" aria-label="filter entries"></nav>
+<section class="stats" aria-label="Shopping ledger">
+  <div class="stat"><span class="num" id="stat-min">—</span><span class="lbl">Min&nbsp;spent</span></div>
+  <div class="stat"><span class="num" id="stat-eyed">—</span><span class="lbl">Eyed</span></div>
+  <div class="stat"><span class="num" id="stat-bought">—</span><span class="lbl">Bought</span></div>
+</section>
+
+<nav class="chips" aria-label="Filter">
+  <button class="chip is-on" data-filter="all">All</button>
+  <button class="chip" data-filter="tokyo">Tokyo</button>
+  <button class="chip" data-filter="kyoto">Kyoto</button>
+  <button class="chip" data-filter="osaka">Osaka</button>
+  <button class="chip chip-accent" data-filter="shop">Wife's shops</button>
+</nav>
 
 <main id="feed" class="feed"></main>
 
 <footer class="colophon">
-  <em>compiled from field notes &amp; receipts.</em>
+  <p>Built mobile-first.<br>Add a photo &mdash; ask Claude.</p>
 </footer>
 
-<div id="lightbox" class="lightbox" aria-modal="true" role="dialog" aria-hidden="true">
-  <div id="lb-count" class="lightbox-count"></div>
-  <div class="lightbox-stage"><img id="lb-img" alt=""></div>
-  <div id="lb-caption" class="lightbox-caption"></div>
+<div id="lightbox" class="lightbox" hidden>
+  <button class="lb-close" aria-label="Close">&times;</button>
+  <figure class="lb-figure">
+    <div class="lb-imgwrap"><img id="lb-img" alt=""></div>
+    <figcaption id="lb-cap"></figcaption>
+  </figure>
+  <button class="lb-prev" aria-label="Previous">&larr;</button>
+  <button class="lb-next" aria-label="Next">&rarr;</button>
 </div>
 
 <script src="data.js"></script>
