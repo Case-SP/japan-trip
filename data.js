@@ -13,14 +13,6 @@ window.TRIP = {
   ],
   entries: [
     {
-      id: "issey-miyake",
-      date: "2026-05-16",
-      city: "osaka",
-      location: "Osaka",
-      src: "photos/osaka-issey-miyake.jpg",
-      shop: { name: "Issey Miyake", minutes: 15 }
-    },
-    {
       id: "beams",
       date: "2026-05-17",
       city: "osaka",
@@ -28,6 +20,14 @@ window.TRIP = {
       src: "photos/beams-osaka.jpg",
       body: "1/4 Beams visited. Men's only store.",
       shop: { name: "BEAMS", minutes: 12 }
+    },
+    {
+      id: "issey-miyake",
+      date: "2026-05-17",
+      city: "osaka",
+      location: "Osaka",
+      src: "photos/osaka-issey-miyake.jpg",
+      shop: { name: "Issey Miyake", minutes: 15 }
     },
     {
       id: "kindal",
