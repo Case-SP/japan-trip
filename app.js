@@ -480,13 +480,37 @@
     ]);
     Object.assign(marketsCache, markets);
 
+    const adminBar = adminToken
+      ? `<div class="admin-bar"><button id="seed-btn" class="admin-btn">Seed 50 fake users</button></div>`
+      : "";
     predictContent.innerHTML = `
       <div class="port" id="port"></div>
+      ${adminBar}
       <div class="markets" id="markets">${items.map(renderItemBlock).join("")}</div>
     `;
 
     renderPortfolio();
     predictContent.addEventListener("click", onDashboardClick);
+    const seedBtn = document.getElementById("seed-btn");
+    if (seedBtn) {
+      seedBtn.addEventListener("click", async () => {
+        if (!confirm("Seed 50 fake users with random bets?")) return;
+        seedBtn.disabled = true;
+        seedBtn.textContent = "Seeding…";
+        try {
+          const r = await fetch(`${PREDICT_WORKER_URL}/seed?count=50&secret=${encodeURIComponent(adminToken)}`, { method: "POST" });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || "seed failed");
+          alert(`Seeded: ${d.created} users · ${d.trades} trades`);
+          predictRendered = false;
+          await renderPredictDashboard();
+        } catch (e) {
+          alert("Seed failed: " + e.message);
+          seedBtn.disabled = false;
+          seedBtn.textContent = "Seed 50 fake users";
+        }
+      });
+    }
     predictRendered = true;
   }
 

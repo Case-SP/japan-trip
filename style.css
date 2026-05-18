@@ -512,6 +512,26 @@ body { padding-bottom: 80px; }
   color: var(--ink-muted);
 }
 
+.admin-bar {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.admin-btn {
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border: 1px dashed var(--rule);
+  border-radius: 999px;
+  color: var(--ink-muted);
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-btn:hover { color: var(--ink); border-color: var(--ink); }
+.admin-btn:disabled { opacity: 0.6; }
+
 .predict-notice {
   font-size: 13px;
   color: var(--ink-muted);
