@@ -402,14 +402,33 @@
     return data;
   }
 
+  async function apiSignInOrUp(name) {
+    // Try to resume an existing user first
+    try {
+      const existing = await apiFetchUser(name);
+      if (existing) return existing;
+    } catch (e) {}
+    // Otherwise create a fresh one
+    try {
+      return await apiSignup(name);
+    } catch (e) {
+      // Race: someone else just claimed it — try fetch once more
+      if (e.message === "taken") {
+        const u = await apiFetchUser(name);
+        if (u) return u;
+      }
+      throw e;
+    }
+  }
+
   function renderSignupForm(err) {
     predictContent.innerHTML = `
       <div class="signup">
         <h3 class="signup-title">Choose your handle</h3>
-        <p class="signup-sub">Start with $1,000 in paper money. Buy YES or NO on whether she'll find each item.</p>
+        <p class="signup-sub">New handles start with $1,000 in paper money. Used yours before? Type the same one to pick up where you left off.</p>
         <input id="signup-input" class="signup-input" type="text" placeholder="@yourname" autocapitalize="off" autocorrect="off" maxlength="20" inputmode="text">
         ${err ? `<div class="signup-err">${escapeHtml(err)}</div>` : ""}
-        <button id="signup-submit" class="signup-submit">Start with $1,000</button>
+        <button id="signup-submit" class="signup-submit">Continue</button>
       </div>
     `;
     const input = document.getElementById("signup-input");
@@ -418,14 +437,14 @@
       const raw = input.value.trim();
       if (!raw) return;
       submit.disabled = true;
-      submit.textContent = "Creating…";
+      submit.textContent = "Loading…";
       try {
-        const user = await apiSignup(raw);
+        const user = await apiSignInOrUp(raw);
         currentUser = user;
         localStorage.setItem("user-name", user.name);
         await renderPredictDashboard();
       } catch (e) {
-        renderSignupForm(e.message === "taken" ? "That name's taken — try another." : e.message);
+        renderSignupForm(e.message === "Load failed" ? "Couldn't reach the server — try again in a moment." : e.message);
       }
     };
     submit.addEventListener("click", go);
