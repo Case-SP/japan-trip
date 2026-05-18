@@ -330,17 +330,6 @@
     return q === "today" ? "Will she find it today?" : "Will she find it at all?";
   }
 
-  function getWallet() {
-    try {
-      const raw = localStorage.getItem("wallet");
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    const fresh = { balance: STARTING_BALANCE, positions: {} };
-    localStorage.setItem("wallet", JSON.stringify(fresh));
-    return fresh;
-  }
-  function saveWallet(w) { localStorage.setItem("wallet", JSON.stringify(w)); }
-
   function priceYes(market) {
     const t = (market.yes || 0) + (market.no || 0);
     return t === 0 ? 0.5 : market.yes / t;
@@ -360,9 +349,11 @@
     return n < 10 ? n.toFixed(1) : n.toFixed(0);
   }
 
+  let currentUser = null;          // { name, balance, positions }
   const marketsCache = {};
-  const stakeChoice = {};  // marketId → chosen stake
+  const stakeChoice = {};          // marketId → chosen stake
   let allMarketIds = [];
+  let predictRendered = false;
 
   async function fetchMarkets(ids) {
     if (!PREDICT_WORKER_URL || !ids.length) return {};
@@ -372,36 +363,95 @@
       return await r.json();
     } catch (e) { return {}; }
   }
-  async function buyShares(marketId, side, shares) {
-    const r = await fetch(`${PREDICT_WORKER_URL}/buy?market=${encodeURIComponent(marketId)}&side=${side}&shares=${shares}`, { method: "POST" });
-    if (!r.ok) throw new Error((await r.json()).error || "buy failed");
+  async function apiSignup(name) {
+    const r = await fetch(`${PREDICT_WORKER_URL}/signup?name=${encodeURIComponent(name)}`, { method: "POST" });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "signup failed");
+    return data;
+  }
+  async function apiFetchUser(name) {
+    const r = await fetch(`${PREDICT_WORKER_URL}/user?name=${encodeURIComponent(name)}`);
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error("user fetch failed");
     return await r.json();
   }
-  async function resolveMarket(marketId, outcome) {
-    if (!adminToken) throw new Error("no admin token");
+  async function apiBuy(marketId, side, amount) {
+    const r = await fetch(`${PREDICT_WORKER_URL}/buy?user=${encodeURIComponent(currentUser.name)}&market=${encodeURIComponent(marketId)}&side=${side}&amount=${amount}`, { method: "POST" });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "buy failed");
+    return data;
+  }
+  async function apiResolve(marketId, outcome) {
     const r = await fetch(`${PREDICT_WORKER_URL}/resolve?market=${encodeURIComponent(marketId)}&outcome=${outcome}&secret=${encodeURIComponent(adminToken)}`, { method: "POST" });
-    if (!r.ok) throw new Error((await r.json()).error || "resolve failed");
-    return await r.json();
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "resolve failed");
+    return data;
   }
 
-  // Auto-settle: when a held position belongs to a resolved market, credit balance and clear
-  function settleResolved(wallet) {
-    let changed = false;
-    Object.keys(wallet.positions).forEach(id => {
-      const m = marketsCache[id];
-      if (!m || m.status !== "resolved") return;
-      const pos = wallet.positions[id];
-      const payout = m.outcome === "yes" ? (pos.yes || 0) : (pos.no || 0);
-      wallet.balance += payout;
-      delete wallet.positions[id];
-      changed = true;
-    });
-    if (changed) saveWallet(wallet);
+  function renderSignupForm(err) {
+    predictContent.innerHTML = `
+      <div class="signup">
+        <h3 class="signup-title">Choose your handle</h3>
+        <p class="signup-sub">Start with $1,000 in paper money. Buy YES or NO on whether she'll find each item.</p>
+        <input id="signup-input" class="signup-input" type="text" placeholder="@yourname" autocapitalize="off" autocorrect="off" maxlength="20" inputmode="text">
+        ${err ? `<div class="signup-err">${escapeHtml(err)}</div>` : ""}
+        <button id="signup-submit" class="signup-submit">Start with $1,000</button>
+      </div>
+    `;
+    const input = document.getElementById("signup-input");
+    const submit = document.getElementById("signup-submit");
+    const go = async () => {
+      const raw = input.value.trim();
+      if (!raw) return;
+      submit.disabled = true;
+      submit.textContent = "Creating…";
+      try {
+        const user = await apiSignup(raw);
+        currentUser = user;
+        localStorage.setItem("user-name", user.name);
+        await renderPredictDashboard();
+      } catch (e) {
+        renderSignupForm(e.message === "taken" ? "That name's taken — try another." : e.message);
+      }
+    };
+    submit.addEventListener("click", go);
+    input.addEventListener("keydown", ev => { if (ev.key === "Enter") go(); });
+    setTimeout(() => input.focus(), 100);
   }
 
-  let predictRendered = false;
+  async function ensureSignedIn() {
+    if (currentUser) return currentUser;
+    const stored = localStorage.getItem("user-name");
+    if (!stored) return null;
+    try {
+      const u = await apiFetchUser(stored);
+      if (u) { currentUser = u; return u; }
+    } catch (e) {}
+    return null;
+  }
+
+  async function refreshUser() {
+    if (!currentUser) return;
+    try {
+      const u = await apiFetchUser(currentUser.name);
+      if (u) currentUser = u;
+    } catch (e) {}
+  }
 
   async function renderPredictDashboard() {
+    if (!PREDICT_WORKER_URL) {
+      predictContent.innerHTML = `<div class="predict-notice">Backend offline — set <code>PREDICT_WORKER_URL</code> in app.js.</div>`;
+      predictRendered = true;
+      return;
+    }
+
+    if (!currentUser) {
+      const u = await ensureSignedIn();
+      if (!u) { renderSignupForm(); return; }
+    }
+
+    predictContent.innerHTML = `<div class="predict-loading">Loading…</div>`;
+
     const items = coveted.filter(c => c.status !== "bought");
     allMarketIds = [];
     items.forEach(c => {
@@ -410,12 +460,14 @@
       allMarketIds.push(predictId(slug, "today"));
     });
 
-    Object.assign(marketsCache, await fetchMarkets(allMarketIds));
-    settleResolved(getWallet());
+    const [markets] = await Promise.all([
+      fetchMarkets(allMarketIds),
+      refreshUser()
+    ]);
+    Object.assign(marketsCache, markets);
 
     predictContent.innerHTML = `
       <div class="port" id="port"></div>
-      ${PREDICT_WORKER_URL ? "" : `<div class="predict-notice">Backend offline — set <code>PREDICT_WORKER_URL</code> in app.js.</div>`}
       <div class="markets" id="markets">${items.map(renderItemBlock).join("")}</div>
     `;
 
@@ -447,15 +499,14 @@
   function renderMarket(slug, q) {
     const id = predictId(slug, q);
     const m = marketsCache[id] || { yes: 0, no: 0, status: "open", outcome: null };
-    const wallet = getWallet();
-    const pos = wallet.positions[id] || { yes: 0, no: 0 };
+    const pos = (currentUser && currentUser.positions[id]) || { yes: 0, no: 0 };
     const pY = priceYes(m);
     const pYesPct = Math.round(pY * 100);
     const totalShares = (m.yes || 0) + (m.no || 0);
     const isResolved = m.status === "resolved";
     const stake = stakeChoice[id] || STAKE_PRESETS[0];
 
-    const resolveCtrl = (!isResolved && adminToken && PREDICT_WORKER_URL)
+    const resolveCtrl = (!isResolved && adminToken)
       ? `<div class="market-admin"><button class="resolve-btn" data-side="yes" data-market="${escapeAttr(id)}">Resolve YES</button><button class="resolve-btn" data-side="no" data-market="${escapeAttr(id)}">Resolve NO</button></div>`
       : "";
 
@@ -467,7 +518,7 @@
       ? `You hold ${fmtShares(pos.yes || 0)} YES · ${fmtShares(pos.no || 0)} NO`
       : "";
 
-    const betUI = isResolved || !PREDICT_WORKER_URL ? "" : `
+    const betUI = isResolved ? "" : `
       <div class="bet">
         <div class="bet-chips">
           ${STAKE_PRESETS.map(a => `<button class="bet-chip${a === stake ? " is-on" : ""}" data-stake="${a}" data-market="${escapeAttr(id)}">$${a}</button>`).join("")}
@@ -498,25 +549,25 @@
   }
 
   function renderPortfolio() {
-    const wallet = getWallet();
+    if (!currentUser) return;
     let positionsValue = 0;
-    Object.keys(wallet.positions).forEach(id => {
+    Object.keys(currentUser.positions || {}).forEach(id => {
       const m = marketsCache[id];
-      if (m) positionsValue += positionValue(wallet.positions[id], m);
+      if (m) positionsValue += positionValue(currentUser.positions[id], m);
     });
-    const total = wallet.balance + positionsValue;
+    const total = currentUser.balance + positionsValue;
     const profit = total - STARTING_BALANCE;
     const profitSign = profit >= 0 ? "+" : "−";
     const profitPct = ((profit / STARTING_BALANCE) * 100);
-    const profitColorClass = profit >= 0 ? "is-up" : "is-down";
 
     const el = document.getElementById("port");
     if (!el) return;
     el.innerHTML = `
       <div class="port-line">
         <div class="port-balance">${fmtMoney(total)}</div>
-        <div class="port-net ${profitColorClass}">${profitSign}${fmtMoney(Math.abs(profit))} <span class="port-pct">${profitSign}${Math.abs(profitPct).toFixed(1)}%</span></div>
+        <div class="port-net">${profitSign}${fmtMoney(Math.abs(profit))} <span class="port-pct">${profitSign}${Math.abs(profitPct).toFixed(1)}%</span></div>
       </div>
+      <div class="port-sub">@${escapeHtml(currentUser.name)} · Cash ${fmtMoney(currentUser.balance)}</div>
     `;
   }
 
@@ -556,35 +607,24 @@
     }
   }
 
-  async function handleBuy(marketId, side, dollars) {
-    const wallet = getWallet();
-    if (wallet.balance < dollars) { alert("Not enough balance"); return; }
-    const m = marketsCache[marketId];
-    if (!m) { alert("Market not loaded"); return; }
-    const price = side === "yes" ? priceYes(m) : (1 - priceYes(m));
-    if (price <= 0.01 || price >= 0.99) { alert("Price too extreme — try a smaller stake or the other side"); return; }
-    const shares = dollars / price;
-
-    let updated;
-    try { updated = await buyShares(marketId, side, shares); }
+  async function handleBuy(marketId, side, amount) {
+    if (!currentUser) return;
+    if (currentUser.balance < amount) { alert("Not enough balance"); return; }
+    let res;
+    try { res = await apiBuy(marketId, side, amount); }
     catch (e) { alert("Buy failed: " + e.message); return; }
-
-    marketsCache[marketId] = updated;
-    wallet.balance -= dollars;
-    if (!wallet.positions[marketId]) wallet.positions[marketId] = { yes: 0, no: 0 };
-    wallet.positions[marketId][side] = (wallet.positions[marketId][side] || 0) + shares;
-    saveWallet(wallet);
-
+    marketsCache[marketId] = res.market;
+    currentUser = res.user;
     rerenderMarket(marketId);
     renderPortfolio();
   }
 
   async function handleResolve(marketId, outcome) {
-    let updated;
-    try { updated = await resolveMarket(marketId, outcome); }
+    let res;
+    try { res = await apiResolve(marketId, outcome); }
     catch (e) { alert("Resolve failed: " + e.message); return; }
-    marketsCache[marketId] = updated;
-    settleResolved(getWallet());
+    marketsCache[marketId] = res.market;
+    await refreshUser();
     rerenderMarket(marketId);
     renderPortfolio();
   }
