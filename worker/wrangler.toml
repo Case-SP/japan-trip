@@ -2,6 +2,9 @@ name = "coveted-votes"
 main = "src/index.js"
 compatibility_date = "2026-05-01"
 
-# KV binding stays managed by the Cloudflare dashboard.
-# (Settings → Variables → KV Namespace Bindings → VOTES)
-# ADMIN_SECRET stays as an encrypted Variable in the same screen.
+# ADMIN_SECRET stays as an encrypted Variable in the Cloudflare dashboard.
+# (Settings → Variables → Encrypted)
+
+[[kv_namespaces]]
+binding = "VOTES"
+id = "1b4c1165e5a540a9ada0ec10ba46ecd7"
