@@ -21,6 +21,13 @@ window.TRIP = {
       shop: { name: "Nuir Vintage", minutes: 35 }
     },
     {
+      id: "2ndstreet-shibuya",
+      date: "2026-05-15",
+      city: "tokyo",
+      location: "Shibuya, Tokyo",
+      shop: { name: "2nd STREET", minutes: 4 }
+    },
+    {
       id: "beams",
       date: "2026-05-17",
       city: "osaka",
