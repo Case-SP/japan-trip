@@ -30,14 +30,16 @@
   const covGrid = document.getElementById("coveted-grid");
   if (covGrid) {
     if (coveted.length) {
-      coveted.forEach(c => {
+      coveted.forEach((c, cardIdx) => {
         const card = document.createElement("article");
         card.className = "cov-card";
         const srcs = [c.img, ...(c.gallery || [])].filter(Boolean);
         const imgBlock = srcs.length
-          ? `<div class="cov-img-wrap">${srcs.map((s, i) =>
-              `<img loading="lazy" src="${escapeAttr(s)}" class="cov-img${i === 0 ? " is-on" : ""}" alt="${escapeAttr(c.name)}" onerror="this.style.visibility='hidden'">`
-            ).join("")}</div>`
+          ? `<div class="cov-img-wrap">${srcs.map((s, i) => {
+              const isLcp = cardIdx === 0 && i === 0;
+              const loadAttr = isLcp ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"';
+              return `<img ${loadAttr} src="${escapeAttr(s)}" class="cov-img${i === 0 ? " is-on" : ""}" alt="${escapeAttr(c.name)}" onerror="this.style.visibility='hidden'">`;
+            }).join("")}</div>`
           : `<div class="cov-placeholder"></div>`;
         const statusCls = c.status ? ` ${c.status.toLowerCase()}` : "";
         card.dataset.count = String(Math.max(1, srcs.length));
@@ -97,7 +99,7 @@
   function buildEntryHTML(entry) {
     const srcs = [entry.src, ...(entry.gallery || [])].filter(Boolean);
     const imgs = srcs.length
-      ? srcs.map((s, i) => `<img loading="lazy" src="${escapeAttr(s)}" class="entry-img${i === 0 ? " is-on" : ""}" alt="" onerror="this.style.visibility='hidden'">`).join("")
+      ? srcs.map((s, i) => `<img loading="lazy" decoding="async" src="${escapeAttr(s)}" class="entry-img${i === 0 ? " is-on" : ""}" alt="" onerror="this.style.visibility='hidden'">`).join("")
       : "";
     const primary = entry.shop ? entry.shop.name : entry.location;
     const placeText = entry.shop ? entry.location : "";
@@ -178,6 +180,26 @@
   const mapClose = document.getElementById("map-close");
   let leafletMap = null;
   let cityMarkers = {};
+  let leafletLoader = null;
+
+  function loadLeaflet() {
+    if (typeof L !== "undefined") return Promise.resolve();
+    if (leafletLoader) return leafletLoader;
+    leafletLoader = new Promise((resolve, reject) => {
+      const css = document.createElement("link");
+      css.rel = "stylesheet";
+      css.href = "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css";
+      css.crossOrigin = "anonymous";
+      document.head.appendChild(css);
+      const js = document.createElement("script");
+      js.src = "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js";
+      js.crossOrigin = "anonymous";
+      js.onload = () => resolve();
+      js.onerror = reject;
+      document.head.appendChild(js);
+    });
+    return leafletLoader;
+  }
 
   function initLeafletMap() {
     if (leafletMap || typeof L === "undefined") return;
@@ -246,7 +268,6 @@
   }
 
   function openMapSheet() {
-    initLeafletMap();
     mapBackdrop.hidden = false;
     requestAnimationFrame(() => {
       mapBackdrop.classList.add("is-open");
@@ -255,7 +276,10 @@
     mapSheet.setAttribute("aria-hidden", "false");
     mapTrigger.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
-    setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 320);
+    loadLeaflet().then(() => {
+      initLeafletMap();
+      setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 320);
+    });
   }
 
   function closeMapSheet() {
@@ -536,7 +560,7 @@
   function renderItemBlock(c) {
     const slug = itemSlug(c);
     const imgTag = c.img
-      ? `<img class="predict-thumb" loading="lazy" src="${escapeAttr(c.img)}" alt="" onerror="this.style.visibility='hidden'">`
+      ? `<img class="predict-thumb" loading="lazy" decoding="async" src="${escapeAttr(c.img)}" alt="" onerror="this.style.visibility='hidden'">`
       : `<div class="predict-thumb"></div>`;
     return `
       <article class="predict-row" data-slug="${escapeAttr(slug)}">
