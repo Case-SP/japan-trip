@@ -120,6 +120,70 @@ export default {
       return json({ users: out.slice(0, 20) });
     }
 
+    // POST /seed?secret=…&count=50 — admin: spin up fake users + random bets
+    if (req.method === "POST" && path === "/seed") {
+      if (!adminOk()) return json({ error: "unauthorized" }, 401);
+      const count = Math.min(200, parseInt(url.searchParams.get("count") || "50"));
+      const today = url.searchParams.get("date") || (() => {
+        const d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      })();
+      const NAMES = [
+        "anna","jules","max","sara","ben","lily","noah","ivy","leo","zoe",
+        "kim","ari","ravi","mae","ezra","luna","milo","ada","rex","june",
+        "theo","iris","kai","wren","felix","nora","owen","ruth","elsa","joel",
+        "harper","soren","vera","neil","tara","jude","sky","rio","indy","cass",
+        "ezra","mila","dax","odin","reese","sage","tess","wilder","yuki","zane"
+      ];
+      const ITEMS = [
+        "cartier-panthere-watch",
+        "dior-saddle-bag",
+        "uniqlo-assorted-shirts",
+        "comme-des-garcons-halter-top",
+        "issey-miyake-fiber-mini",
+        "x-sailor-moon-shirt"
+      ];
+      const MARKETS = [];
+      ITEMS.forEach(s => { MARKETS.push(s + ":all"); MARKETS.push(s + ":today:" + today); });
+      const STAKES = [10, 10, 25, 25, 50, 50, 100];
+      const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+      const mState = {};
+      for (const mid of MARKETS) mState[mid] = await getMarket(mid);
+
+      let created = 0, trades = 0;
+      const userPuts = [];
+      for (let i = 0; i < count; i++) {
+        const base = NAMES[i % NAMES.length];
+        const handle = `${base}${10 + i}`.toLowerCase();
+        if (await getUser(handle)) continue;
+        const u = { name: handle, balance: STARTING_BALANCE, positions: {}, created: Date.now() };
+        const bias = Math.random(); // 0=NO-leaning, 1=YES-leaning
+        const numBets = 2 + Math.floor(Math.random() * 5);
+        for (let j = 0; j < numBets; j++) {
+          const mid = pick(MARKETS);
+          const m = mState[mid];
+          if (!m || m.status !== "open") continue;
+          const side = Math.random() < bias ? "yes" : "no";
+          const amount = pick(STAKES);
+          if (u.balance < amount) continue;
+          const yE = (m.yes || 0) + SEED, nE = (m.no || 0) + SEED;
+          const price = side === "yes" ? yE / (yE + nE) : nE / (yE + nE);
+          const shares = amount / price;
+          m[side] = (m[side] || 0) + shares;
+          u.balance -= amount;
+          if (!u.positions[mid]) u.positions[mid] = { yes: 0, no: 0 };
+          u.positions[mid][side] += shares;
+          trades++;
+        }
+        userPuts.push(putUser(u));
+        created++;
+      }
+      await Promise.all(userPuts);
+      await Promise.all(Object.keys(mState).map(mid => putMarket(mid, mState[mid])));
+      return json({ created, trades });
+    }
+
     return json({ error: "not found" }, 404);
   }
 };
