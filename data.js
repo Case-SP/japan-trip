@@ -36,6 +36,14 @@ window.TRIP = {
       shop: { name: "Komehyo", minutes: 28.5 }
     },
     {
+      id: "desert-snow",
+      date: "2026-05-15",
+      city: "tokyo",
+      location: "Shibuya, Tokyo",
+      body: "Almost scored the Sailor Moon T-shirt — “sold out.”",
+      shop: { name: "Desert Snow", minutes: 10 }
+    },
+    {
       id: "beams",
       date: "2026-05-17",
       city: "osaka",
