@@ -409,6 +409,17 @@ body { padding-bottom: 80px; }
   justify-content: space-between;
   gap: 12px;
 }
+.port-handle {
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink-muted);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .port-balance {
   font-size: 22px;
   line-height: 1;
@@ -416,10 +427,14 @@ body { padding-bottom: 80px; }
   color: var(--ink);
 }
 .port-net {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
 }
 .port-net .port-pct {
   font-size: 12px;

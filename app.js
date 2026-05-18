@@ -564,10 +564,10 @@
     if (!el) return;
     el.innerHTML = `
       <div class="port-line">
-        <div class="port-balance">${fmtMoney(total)}</div>
-        <div class="port-net">${profitSign}${fmtMoney(Math.abs(profit))} <span class="port-pct">${profitSign}${Math.abs(profitPct).toFixed(1)}%</span></div>
+        <span class="port-handle">@${escapeHtml(currentUser.name)}</span>
+        <span class="port-balance">${fmtMoney(total)}</span>
+        <span class="port-net">${profitSign}${fmtMoney(Math.abs(profit))} <span class="port-pct">${profitSign}${Math.abs(profitPct).toFixed(1)}%</span></span>
       </div>
-      <div class="port-sub">@${escapeHtml(currentUser.name)} · Cash ${fmtMoney(currentUser.balance)}</div>
     `;
   }
 
