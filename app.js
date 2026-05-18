@@ -316,6 +316,18 @@
   }
   const adminToken = localStorage.getItem("admin-token");
 
+  // Hidden one-shot seed trigger: visit /?seed=1 while signed in as admin
+  if (urlParams.has("seed") && adminToken && PREDICT_WORKER_URL) {
+    const n = parseInt(urlParams.get("seed"), 10) || 50;
+    history.replaceState(null, "", window.location.pathname);
+    if (confirm(`Seed ${n} fake users with random bets?`)) {
+      fetch(`${PREDICT_WORKER_URL}/seed?count=${n}&secret=${encodeURIComponent(adminToken)}`, { method: "POST" })
+        .then(r => r.json())
+        .then(d => alert(d && d.created != null ? `Seeded: ${d.created} users · ${d.trades} trades` : `Seed response: ${JSON.stringify(d)}`))
+        .catch(e => alert("Seed failed: " + e.message));
+    }
+  }
+
   function todayKey() {
     const d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
