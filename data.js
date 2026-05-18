@@ -44,6 +44,13 @@ window.TRIP = {
       shop: { name: "Desert Snow", minutes: 10 }
     },
     {
+      id: "lux-brands-vintage",
+      date: "2026-05-15",
+      city: "tokyo",
+      location: "Shibuya, Tokyo",
+      shop: { name: "Lux Brands in Vintage", minutes: 30 }
+    },
+    {
       id: "beams",
       date: "2026-05-17",
       city: "osaka",
