@@ -17,6 +17,7 @@ window.TRIP = {
       date: "2026-05-14",
       city: "tokyo",
       location: "Shibuya, Tokyo",
+      src: "photos/nuir.png",
       body: "Saw 2 Dior bags — decided to keep looking. Feels like a purchase is imminent.",
       shop: { name: "Nuir Vintage", minutes: 35 }
     },
@@ -25,6 +26,7 @@ window.TRIP = {
       date: "2026-05-15",
       city: "tokyo",
       location: "Shibuya, Tokyo",
+      src: "photos/2ndstreet-shibuya.png",
       shop: { name: "2nd STREET", minutes: 4 }
     },
     {
@@ -32,6 +34,7 @@ window.TRIP = {
       date: "2026-05-15",
       city: "tokyo",
       location: "Shibuya, Tokyo",
+      src: "photos/komehyo-shibuya.png",
       body: "Hunting a better price on the bag.",
       shop: { name: "Komehyo", minutes: 28.5 }
     },
@@ -40,6 +43,7 @@ window.TRIP = {
       date: "2026-05-15",
       city: "tokyo",
       location: "Shibuya, Tokyo",
+      src: "photos/desert-snow.png",
       body: "Almost scored the Sailor Moon T-shirt — “sold out.”",
       shop: { name: "Desert Snow", minutes: 10 }
     },
