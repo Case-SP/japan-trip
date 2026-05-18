@@ -17,7 +17,7 @@ window.TRIP = {
       date: "2026-05-14",
       city: "tokyo",
       location: "Shibuya, Tokyo",
-      body: "Looking for the Dior bag.",
+      body: "Saw 2 Dior bags — decided to keep looking. Feels like a purchase is imminent.",
       shop: { name: "Nuir Vintage", minutes: 35 }
     },
     {
@@ -26,6 +26,14 @@ window.TRIP = {
       city: "tokyo",
       location: "Shibuya, Tokyo",
       shop: { name: "2nd STREET", minutes: 4 }
+    },
+    {
+      id: "komehyo-shibuya",
+      date: "2026-05-15",
+      city: "tokyo",
+      location: "Shibuya, Tokyo",
+      body: "Hunting a better price on the bag.",
+      shop: { name: "Komehyo", minutes: 28.5 }
     },
     {
       id: "beams",
