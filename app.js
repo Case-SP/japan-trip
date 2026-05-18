@@ -331,8 +331,10 @@
   }
 
   function priceYes(market) {
-    const t = (market.yes || 0) + (market.no || 0);
-    return t === 0 ? 0.5 : market.yes / t;
+    const SEED = 10;
+    const yE = (market.yes || 0) + SEED;
+    const nE = (market.no || 0) + SEED;
+    return yE / (yE + nE);
   }
   function positionValue(pos, market) {
     if (!pos) return 0;
