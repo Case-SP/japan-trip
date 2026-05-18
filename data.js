@@ -13,6 +13,14 @@ window.TRIP = {
   ],
   entries: [
     {
+      id: "nuir",
+      date: "2026-05-14",
+      city: "tokyo",
+      location: "Shibuya, Tokyo",
+      body: "Looking for the Dior bag.",
+      shop: { name: "Nuir Vintage", minutes: 35 }
+    },
+    {
       id: "beams",
       date: "2026-05-17",
       city: "osaka",
