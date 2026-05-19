@@ -213,11 +213,11 @@ body { padding-bottom: 80px; }
 }
 .filter-seg.is-on .filter-label { color: var(--ink); }
 
-/* ── Vertical feed ────────────────────────────────────── */
+/* ── Feed (2-col grid, same shape as Coveted) ─────────── */
 .feed {
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px 14px;
 }
 .entry {
   display: flex;
@@ -227,25 +227,24 @@ body { padding-bottom: 80px; }
 .entry-img-stack {
   position: relative;
   width: 100%;
+  aspect-ratio: 1 / 1;
   background: var(--paper);
+  overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 .entry-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  background: var(--paper);
   display: block;
   opacity: 0;
   transition: opacity 300ms ease;
 }
 .entry-img.is-on { opacity: 1; }
-.entry-img:not(:first-child) {
-  position: absolute;
-  top: 0; left: 0;
-  height: 100%;
-  object-fit: contain;
-  background: var(--paper);
-}
 .entry-meta {
   padding: 8px 0 0;
   display: flex;
@@ -257,7 +256,8 @@ body { padding-bottom: 80px; }
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .entry-shop {
   font-size: 16px;
@@ -267,7 +267,7 @@ body { padding-bottom: 80px; }
   margin: 0;
 }
 .entry-time {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -275,22 +275,22 @@ body { padding-bottom: 80px; }
   font-variant-numeric: tabular-nums;
 }
 .entry-body {
-  font-size: 14px;
-  line-height: 1.25;
+  font-size: 13px;
+  line-height: 1.3;
   letter-spacing: -0.02em;
   color: var(--ink-muted);
   margin: 0;
-  max-width: 50%;
+  max-width: 100%;
 }
 .entry-place {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--ink-muted);
   margin: 0;
 }
 .entry-stats {
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--ink-muted);
@@ -767,4 +767,5 @@ body { padding-bottom: 80px; }
     margin-right: auto;
   }
   .coveted-grid { grid-template-columns: repeat(4, 1fr); gap: 40px 18px; }
+  .feed { grid-template-columns: repeat(4, 1fr); gap: 40px 18px; }
 }
