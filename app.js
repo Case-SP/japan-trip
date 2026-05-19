@@ -103,26 +103,12 @@
       : "";
     const primary = entry.shop ? entry.shop.name : entry.location;
     const placeText = entry.shop ? entry.location : "";
-    const timeText = entry.shop && entry.shop.minutes != null ? `${entry.shop.minutes} min` : "";
-    let statsText = "";
-    if (entry.shop) {
-      const p = [];
-      if (entry.shop.eyed != null) p.push(`${entry.shop.eyed} eyed`);
-      if (entry.shop.bought != null) p.push(`${entry.shop.bought} bought`);
-      statsText = p.join(" · ");
-    }
-    const bodyText = entry.body || "";
     return `
       <article class="entry" data-id="${escapeAttr(entry.id)}" data-city="${escapeAttr(entry.city || "")}" data-count="${Math.max(1, srcs.length)}" data-index="0">
         ${imgs ? `<div class="entry-img-stack">${imgs}</div>` : ""}
         <div class="entry-meta">
-          <div class="entry-row-title">
-            <span class="entry-shop">${escapeHtml(primary || "")}</span>
-            ${timeText ? `<span class="entry-time">${escapeHtml(timeText)}</span>` : ""}
-          </div>
-          ${bodyText ? `<p class="entry-body">${escapeHtml(bodyText)}</p>` : ""}
+          <div class="entry-shop">${escapeHtml(primary || "")}</div>
           ${placeText ? `<div class="entry-place">${escapeHtml(placeText)}</div>` : ""}
-          ${statsText ? `<div class="entry-stats">${escapeHtml(statsText)}</div>` : ""}
         </div>
       </article>
     `;
@@ -156,18 +142,52 @@
   function renderFeed() {
     feedEl.innerHTML = sortedEntries.map(buildEntryHTML).join("");
     feedEl.querySelectorAll(".entry").forEach(entry => {
-      const count = parseInt(entry.dataset.count, 10);
-      if (count <= 1) return;
-      const stack = entry.querySelector(".entry-img-stack");
-      if (!stack) return;
-      stack.addEventListener("click", () => {
-        const imgs = entry.querySelectorAll(".entry-img");
-        let idx = parseInt(entry.dataset.index, 10);
-        const next = (idx + 1) % count;
-        entry.dataset.index = next;
-        imgs.forEach((img, i) => img.classList.toggle("is-on", i === next));
-      });
+      const id = entry.dataset.id;
+      const entryData = sortedEntries.find(e => e.id === id);
+      if (!entryData) return;
+      entry.addEventListener("click", () => openEntryModal(entryData));
     });
+  }
+
+  /* ── Entry tap modal — time + description ───────────── */
+  let entryModalBackdrop, entryModalEl;
+  function ensureEntryModal() {
+    if (entryModalEl) return;
+    entryModalBackdrop = document.createElement("div");
+    entryModalBackdrop.className = "entry-modal-backdrop";
+    entryModalBackdrop.addEventListener("click", closeEntryModal);
+    document.body.appendChild(entryModalBackdrop);
+
+    entryModalEl = document.createElement("div");
+    entryModalEl.className = "entry-modal";
+    entryModalEl.setAttribute("role", "dialog");
+    entryModalEl.setAttribute("aria-hidden", "true");
+    document.body.appendChild(entryModalEl);
+
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && entryModalEl.classList.contains("is-open")) closeEntryModal();
+    });
+  }
+  function openEntryModal(entry) {
+    ensureEntryModal();
+    const timeText = entry.shop && entry.shop.minutes != null ? `${entry.shop.minutes} min` : "";
+    const bodyText = entry.body || "";
+    if (!timeText && !bodyText) return;
+    entryModalEl.innerHTML = `
+      ${timeText ? `<div class="entry-modal-time">${escapeHtml(timeText)}</div>` : ""}
+      ${bodyText ? `<p class="entry-modal-body">${escapeHtml(bodyText)}</p>` : ""}
+    `;
+    requestAnimationFrame(() => {
+      entryModalBackdrop.classList.add("is-open");
+      entryModalEl.classList.add("is-open");
+      entryModalEl.setAttribute("aria-hidden", "false");
+    });
+  }
+  function closeEntryModal() {
+    if (!entryModalEl) return;
+    entryModalBackdrop.classList.remove("is-open");
+    entryModalEl.classList.remove("is-open");
+    entryModalEl.setAttribute("aria-hidden", "true");
   }
 
   renderFilterBar();
